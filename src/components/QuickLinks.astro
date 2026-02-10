@@ -1,0 +1,57 @@
+---
+import { mediaUrl } from '../lib/payload';
+import type { IconCard } from '../lib/payload';
+
+interface Props {
+  cards: IconCard[];
+  columns?: '3' | '4';
+}
+
+const { cards, columns = '4' } = Astro.props;
+const gridCols = columns === '3' ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
+
+// Fallback SVG icons keyed by label (lowercase) for when CMS icons aren't set
+const fallbackIcons: Record<string, string> = {
+  'donate online': `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M9.5 17H15v-1.5h-4V14h2.5v-1.5H11v-.85c0-1.2.98-2.15 2.18-2.15.98 0 1.82.63 2.12 1.5h1.6c-.38-1.7-1.9-3-3.72-3-2.1 0-3.68 1.62-3.68 3.65v.85H8V14h1.5v1.5H8V17h1.5z"/>`,
+  'prayer times': `<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>`,
+  'news': `<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10-4h2v2h-2zm-6 0h6v2h-6zm-4-4h14v2H6z"/>`,
+  'forms': `<path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-3-7H9v2h6v-2zm0 4H9v2h6v-2zm-2-8H9v2h4V9z"/>`,
+  'volunteering': `<path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/>`,
+  'contact us': `<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>`,
+  'facilities': `<path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>`,
+  'our schools': `<path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>`,
+};
+---
+
+<section class="px-5 md:px-10 pt-12 lg:pt-16 pb-10 lg:pb-12">
+  <div class="flex items-baseline justify-between mb-8 lg:mb-10">
+    <h2 class="text-[26px] lg:text-[32px] font-bold">Quick Links</h2>
+    <a href="#" class="text-teal text-[14px] lg:text-[16px] font-medium border border-teal rounded-full px-4 lg:px-5 py-1.5 lg:py-2 hover:bg-teal hover:text-white transition-colors">View all</a>
+  </div>
+  <div class={`grid grid-cols-2 sm:grid-cols-3 ${gridCols} gap-4 lg:gap-5`}>
+    {cards.map((card) => {
+      const href = card.url || (card.page && typeof card.page === 'object' ? `/${card.page.slug}` : '#');
+      const iconMedia = card.icon && typeof card.icon === 'object' ? card.icon : null;
+      const iconSrc = iconMedia ? mediaUrl(iconMedia) : null;
+      const isSvgUrl = iconSrc?.endsWith('.svg');
+      const fallbackSvg = fallbackIcons[card.label.toLowerCase()] ?? null;
+
+      return (
+        <a
+          href={href}
+          class="group border border-navy/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-6 lg:py-8 flex flex-col items-center text-center hover:border-teal hover:shadow-lg hover:shadow-teal/8 transition-all duration-200"
+        >
+          <div class="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center mb-4 lg:mb-5 text-teal group-hover:scale-110 transition-transform duration-200">
+            {iconSrc
+              ? <img src={iconSrc} alt="" class="w-8 h-8 lg:w-10 lg:h-10" />
+              : fallbackSvg
+                ? <svg class="w-8 h-8 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor" set:html={fallbackSvg} />
+                : <svg class="w-8 h-8 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            }
+          </div>
+          <span class="text-[15px] lg:text-[18px] font-bold text-navy">{card.label}</span>
+        </a>
+      );
+    })}
+  </div>
+</section>

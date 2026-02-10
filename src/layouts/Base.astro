@@ -1,0 +1,363 @@
+---
+import '../styles/global.css';
+import { getHeader, getFooter, getSiteSettings, getBannerAnnouncements, mediaUrl } from '../lib/payload';
+import type { Header, Footer, SiteSettings, Announcement } from '../lib/payload';
+import type { PrayerTimesData } from '../lib/prayer-times';
+
+interface Props {
+  title?: string;
+  prayerData?: PrayerTimesData | null;
+}
+
+const { title, prayerData } = Astro.props;
+
+let header: Header | null = null;
+let footer: Footer | null = null;
+let siteSettings: SiteSettings | null = null;
+let announcements: Announcement[] = [];
+
+try {
+  [header, footer, siteSettings, announcements] = await Promise.all([
+    getHeader(),
+    getFooter(),
+    getSiteSettings(),
+    getBannerAnnouncements().catch(() => [] as Announcement[]),
+  ]);
+} catch (e) {
+  console.error('Failed to fetch layout globals:', e);
+}
+
+const pageTitle = title
+  ? `${title} | ${siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'}`
+  : siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society';
+
+const logoUrl = header?.logo ? mediaUrl(header.logo) : '/images/logo.png';
+const footerLogoUrl = footer?.logo ? mediaUrl(footer.logo) : '/images/logo.png';
+const navLinks = header?.navLinks ?? [];
+
+// Prayer times for the header table (only the 5 main salah)
+const mainPrayers = prayerData?.prayers.filter(p => p.name !== 'Sunrise') ?? [];
+const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {siteSettings?.defaultMetaDescription && <meta name="description" content={siteSettings.defaultMetaDescription} />}
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="bg-white">
+
+    <!-- ===== ANNOUNCEMENTS BAR ===== -->
+    {announcements.length > 0 && (
+      <div class="bg-teal text-white py-2.5 px-5 md:px-10 overflow-hidden" id="announcement-bar">
+        <div class="max-w-[1440px] mx-auto flex items-center justify-center text-center relative">
+          {announcements.map((a, i) => (
+            <p
+              class={`announcement-item text-[14px] md:text-[15px] font-medium transition-opacity duration-500 ${i === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 flex items-center justify-center'}`}
+              data-index={i}
+            >
+              {a.title}
+            </p>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {announcements.length > 1 && (
+      <script define:vars={{ count: announcements.length }}>
+        (function() {
+          let current = 0;
+          const items = document.querySelectorAll('.announcement-item');
+          if (items.length < 2) return;
+
+          setInterval(() => {
+            items[current].classList.remove('opacity-100');
+            items[current].classList.add('opacity-0');
+            current = (current + 1) % count;
+            items[current].classList.remove('opacity-0');
+            items[current].classList.add('opacity-100');
+          }, 5000);
+        })();
+      </script>
+    )}
+
+    <!-- ===== TOP BAR ===== -->
+    <header class="flex items-start justify-between px-5 md:px-10 pt-4 pb-2">
+      <div class="shrink-0 z-20">
+        <img src={logoUrl} alt={siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'} class="w-[110px] md:w-[150px] h-auto" />
+      </div>
+      {prayerData && (
+        <div class="text-right pt-2 hidden lg:block">
+          <div class="flex items-center justify-end gap-6 text-[15px] text-muted mb-2">
+            <span>{prayerData.date}</span>
+            {prayerData.hijriDate && <span>{prayerData.hijriDate}</span>}
+          </div>
+          <table class="ml-auto text-center text-[15px]">
+            <thead>
+              <tr class="font-medium text-navy">
+                <td class="pr-5"></td>
+                <td class="px-4">Fajr</td>
+                <td class="px-4">Zuhr</td>
+                <td class="px-4">'Asr</td>
+                <td class="px-4">Maghrib</td>
+                <td class="px-4">'Isha</td>
+              </tr>
+            </thead>
+            <tbody class="text-navy">
+              <tr>
+                <td class="text-muted text-right pr-5 font-medium">Begins</td>
+                {mainPrayers.map((p) => (
+                  <td class="px-4">{p.begins}</td>
+                ))}
+              </tr>
+              <tr>
+                <td class="text-muted text-right pr-5 font-medium">Jama'ah</td>
+                {mainPrayers.map((p) => (
+                  <td class="px-4">{p.jamaah}</td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      <!-- Mobile hamburger -->
+      <button id="menu-toggle" class="lg:hidden text-navy p-2 mt-2" aria-label="Open menu">
+        <svg id="menu-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+        <svg id="close-icon" class="hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- ===== MOBILE MENU ===== -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-50 lg:hidden transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+      <div class="flex items-center justify-between px-5 pt-4 pb-2">
+        <img src={logoUrl} alt="QIS" class="w-[90px] h-auto" />
+        <button id="menu-close" class="text-navy p-2" aria-label="Close menu">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Prayer Times Card -->
+      {prayerData && (
+        <div class="mx-5 mt-4 bg-navy rounded-2xl p-5">
+          <div class="flex items-center justify-between text-white/60 text-[13px] mb-3">
+            <span>{prayerData.date}</span>
+            {prayerData.hijriDate && <span>{prayerData.hijriDate}</span>}
+          </div>
+          <div class="grid grid-cols-5 gap-2 text-center text-white">
+            {mainPrayers.map((p) => {
+              const isNext = p.name === nextPrayerName;
+              return (
+                <div class={isNext ? 'bg-teal/30 rounded-lg py-1 -my-1' : ''}>
+                  <div class={`text-[11px] uppercase tracking-wide mb-1 ${isNext ? 'text-teal' : 'text-white/50'}`}>{p.name === 'Maghrib' ? 'Magh' : p.name}</div>
+                  <div class={`text-[14px] font-bold ${isNext ? 'text-green' : ''}`}>{p.jamaah}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <!-- Navigation Links -->
+      <nav class="px-5 pt-6 pb-8">
+        <div class="space-y-1">
+          {navLinks.length > 0
+            ? navLinks.map((link, i) => {
+                const href = link.url || (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
+                return (
+                  <a
+                    href={href}
+                    class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${i === 0 ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}
+                    target={link.openInNewTab ? '_blank' : undefined}
+                    rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })
+            : (
+              <>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl bg-teal-tint transition-colors">Home</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Salah Times</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Donate</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">About QIS</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Services</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">News</a>
+                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Contact Us</a>
+              </>
+            )
+          }
+        </div>
+      </nav>
+    </div>
+
+    <script>
+      function initMobileMenu() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuClose = document.getElementById('menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        const body = document.body;
+
+        function openMenu() {
+          mobileMenu?.classList.remove('translate-x-full');
+          menuIcon?.classList.add('hidden');
+          closeIcon?.classList.remove('hidden');
+          body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+          mobileMenu?.classList.add('translate-x-full');
+          menuIcon?.classList.remove('hidden');
+          closeIcon?.classList.add('hidden');
+          body.style.overflow = '';
+        }
+
+        menuToggle?.addEventListener('click', openMenu);
+        menuClose?.addEventListener('click', closeMenu);
+
+        const menuLinks = mobileMenu?.querySelectorAll('a');
+        menuLinks?.forEach(link => {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+      initMobileMenu();
+    </script>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="relative z-20 bg-teal rounded-b-[24px] hidden lg:flex items-center justify-center gap-1 py-3 text-white text-[15px] font-semibold">
+      {navLinks.length > 0
+        ? navLinks.map((link, i) => {
+            const href = link.url || (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
+            const hasChildren = link.children && link.children.length > 0;
+            return (
+              <a
+                href={href}
+                class={`px-5 py-2 rounded-xl transition-colors ${i === 0 ? 'bg-white/20' : 'hover:bg-white/10'} ${hasChildren ? 'flex items-center gap-1' : ''}`}
+                target={link.openInNewTab ? '_blank' : undefined}
+                rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+              >
+                {link.label}
+                {hasChildren && (
+                  <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                )}
+              </a>
+            );
+          })
+        : (
+          <>
+            <a href="#" class="bg-white/20 px-5 py-2 rounded-xl transition-colors">Home</a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Salah Times</a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Donate</a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
+              About QIS
+              <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
+              Services
+              <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">News</a>
+            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Contact Us</a>
+          </>
+        )
+      }
+    </nav>
+
+    <slot />
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-light-bg">
+      <div class="max-w-[1440px] mx-auto px-5 md:px-10 pt-10 lg:pt-14 pb-8 lg:pb-10">
+        <img src={footerLogoUrl} alt="QIS Logo" class="w-[120px] lg:w-[140px] mb-3" />
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10">
+          <!-- Address -->
+          {footer?.address && (
+            <div class="col-span-2 sm:col-span-1">
+              <address class="not-italic text-[14px] lg:text-[15px] leading-[1.85] text-navy">
+                {footer.address.line1 && <>{footer.address.line1}<br /></>}
+                {footer.address.line2 && <>{footer.address.line2}<br /></>}
+                {footer.address.city && footer.address.postcode && <>{footer.address.city}, {footer.address.postcode}</>}
+              </address>
+              <a href="#" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
+            </div>
+          )}
+
+          <!-- Dynamic columns from CMS -->
+          {footer?.columns?.map((col) => (
+            <div>
+              <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">{col.heading}</h4>
+              <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
+                {col.links?.map((link) => {
+                  const href = link.url || (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
+                  return (
+                    <li><a href={href} class="text-teal hover:text-navy transition-colors">{link.label}</a></li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+
+          <!-- Fallback when no CMS columns -->
+          {(!footer?.columns || footer.columns.length === 0) && (
+            <>
+              <div>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">About</h4>
+                <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">About QIS</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Services</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Roles</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Features</h4>
+                <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Donate Online</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Prayer Times</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Mobile App</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Information</h4>
+                <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Announcements</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Facilities</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Schools</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Help</h4>
+                <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Contact Us</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Application Forms</a></li>
+                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Become a Member</a></li>
+                </ul>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div class="bg-navy text-white py-4 lg:py-5">
+        <div class="max-w-[1440px] mx-auto px-5 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-2 text-[13px] lg:text-[14px]">
+          <span class="text-white/70">{footer?.copyright ?? '\u00A9 2026 Quwwat-ul-Islam Society. All rights reserved.'}</span>
+          {footer?.charityNumber && (
+            <span class="text-white/50 text-[12px]">Registered Charity No. {footer.charityNumber}</span>
+          )}
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>

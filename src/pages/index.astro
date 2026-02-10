@@ -1,627 +1,102 @@
 ---
-import '../styles/global.css';
+import Base from '../layouts/Base.astro';
+import HeroSlider from '../components/HeroSlider.astro';
+import DonateBar from '../components/DonateBar.astro';
+import NewsSection from '../components/NewsSection.astro';
+import PrayerTimesPanel from '../components/PrayerTimesPanel.astro';
+import QuickLinks from '../components/QuickLinks.astro';
 
-const prayerData = [
-  { name: "Fajr", begins: "6:07", jamaah: "7:00" },
-  { name: "Sunrise", begins: "", jamaah: "7:46" },
-  { name: "Dhuhr", begins: "12:19", jamaah: "1:00" },
-  { name: "Asr", begins: "2:52", jamaah: "3:15" },
-  { name: "Maghrib", begins: "4:43", jamaah: "4:48" },
-  { name: "Esha", begins: "6:21", jamaah: "7:30" },
-];
+import { getHomePage, getLatestNews, getDonateSettings } from '../lib/payload';
+import type { HeroSliderBlock, IconCardGridBlock, DonateSettings, News } from '../lib/payload';
+import { getTodayPrayerTimes } from '../lib/prayer-times';
+import type { PrayerTimesData } from '../lib/prayer-times';
 
-const quickLinks = [
-  { label: "Donate Online", icon: `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M9.5 17H15v-1.5h-4V14h2.5v-1.5H11v-.85c0-1.2.98-2.15 2.18-2.15.98 0 1.82.63 2.12 1.5h1.6c-.38-1.7-1.9-3-3.72-3-2.1 0-3.68 1.62-3.68 3.65v.85H8V14h1.5v1.5H8V17h1.5z"/>` },
-  { label: "Prayer Times", icon: `<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>` },
-  { label: "News", icon: `<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10-4h2v2h-2zm-6 0h6v2h-6zm-4-4h14v2H6z"/>` },
-  { label: "Forms", icon: `<path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-3-7H9v2h6v-2zm0 4H9v2h6v-2zm-2-8H9v2h4V9z"/>` },
-  { label: "Volunteering", icon: `<path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/>` },
-  { label: "Contact Us", icon: `<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>` },
-  { label: "Facilities", icon: `<path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>` },
-  { label: "Our Schools", icon: `<path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>` },
-];
+// Fetch all data in parallel
+const [homePage, newsArticles, donateSettings, prayerData] = await Promise.all([
+  getHomePage().catch(() => null),
+  getLatestNews(3).catch(() => [] as News[]),
+  getDonateSettings().catch(() => null as DonateSettings | null),
+  getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
+]);
+
+// Extract layout blocks from the home page
+const layout = homePage?.layout ?? [];
+const heroBlock = layout.find((b): b is HeroSliderBlock => b.blockType === 'hero-slider');
+const iconCardBlock = layout.find((b): b is IconCardGridBlock => b.blockType === 'icon-card-grid');
+
+// Hero slides — fall back to hardcoded if CMS is empty
+const heroSlides = heroBlock?.slides?.length
+  ? heroBlock.slides
+  : [
+      { image: '/images/hero.png', title: 'Daily Ramadan Talks', subtitle: 'After Asr & Esha', ctaLabel: 'View Schedule', ctaUrl: '#' },
+      { image: '/images/hero.png', kicker: 'EYFS & Primary Open Day', title: "Quwwat-ul-Islam Girls' School", subtitle: 'Mon 5 Jan 2026 · 9:30 – 12:30', ctaLabel: 'Register Now', ctaUrl: '#' },
+    ];
+const autoAdvance = heroBlock?.autoAdvance ?? 6;
+
+// Quick links — fall back to hardcoded
+const quickLinkCards = iconCardBlock?.cards?.length
+  ? iconCardBlock.cards
+  : [
+      { label: 'Donate Online', url: '#' },
+      { label: 'Prayer Times', url: '#' },
+      { label: 'News', url: '#' },
+      { label: 'Forms', url: '#' },
+      { label: 'Volunteering', url: '#' },
+      { label: 'Contact Us', url: '#' },
+      { label: 'Facilities', url: '#' },
+      { label: 'Our Schools', url: '#' },
+    ];
+const quickLinkColumns = iconCardBlock?.columns ?? '4';
+
+// Donate settings — fall back to defaults
+const donate: DonateSettings = donateSettings ?? {
+  amounts: [{ value: 5 }, { value: 10 }, { value: 20 }, { value: 50 }, { value: 100 }],
+  defaultAmount: 10,
+  frequencies: [
+    { label: 'One Time', value: 'once' },
+    { label: 'Monthly', value: 'monthly' },
+  ],
+  defaultFrequency: 'once',
+  heading: 'Donate',
+  ctaText: 'Donate Now',
+};
+
+// Fallback prayer data when API is unavailable
+const fallbackPrayerData: PrayerTimesData = {
+  prayers: [
+    { name: 'Fajr', begins: '6:07', jamaah: '7:00' },
+    { name: 'Sunrise', begins: '7:46', jamaah: '' },
+    { name: 'Zuhr', begins: '12:19', jamaah: '1:00' },
+    { name: 'Asr', begins: '2:52', jamaah: '3:15' },
+    { name: 'Maghrib', begins: '4:43', jamaah: '4:48' },
+    { name: 'Isha', begins: '6:21', jamaah: '7:30' },
+  ],
+  nextPrayer: { name: 'Isha', jamaah: '7:30' },
+  date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+  hijriDate: '',
+  isRamadan: false,
+};
+
+const prayers = prayerData ?? fallbackPrayerData;
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
-    <title>Quwwat-ul-Islam Society</title>
-  </head>
-  <body class="bg-white">
+<Base title="Home" prayerData={prayers}>
+  <!-- ===== HERO BANNER ===== -->
+  <HeroSlider slides={heroSlides} autoAdvance={autoAdvance} />
 
-    <!-- ===== ANNOUNCEMENTS BAR ===== -->
-    <div class="bg-teal text-white py-2.5 px-5 md:px-10">
-      <div class="max-w-[1440px] mx-auto flex items-center justify-center text-center">
-        <p class="text-[14px] md:text-[15px] font-medium">
-          <span class="font-bold">Important:</span> Jumu'ah prayers this Friday will be at 12:30 PM and 1:30 PM
-        </p>
-      </div>
-    </div>
+  <!-- ===== CONTAINED CONTENT ===== -->
+  <div class="max-w-[1440px] mx-auto">
 
-    <!-- ===== TOP BAR ===== -->
-    <header class="flex items-start justify-between px-5 md:px-10 pt-4 pb-2">
-      <div class="shrink-0 z-20">
-        <img src="/images/logo.png" alt="Quwwat-ul-Islam Society" class="w-[110px] md:w-[150px] h-auto" />
-      </div>
-      <div class="text-right pt-2 hidden lg:block">
-        <div class="flex items-center justify-end gap-6 text-[15px] text-muted mb-2">
-          <span>15 January 2026</span>
-          <span>26 Rajab 1447</span>
-        </div>
-        <table class="ml-auto text-center text-[15px]">
-          <thead>
-            <tr class="font-medium text-navy">
-              <td class="pr-5"></td>
-              <td class="px-4">Fajr</td>
-              <td class="px-4">Zuhr</td>
-              <td class="px-4">'Asr</td>
-              <td class="px-4">Maghrib</td>
-              <td class="px-4">'Isha</td>
-            </tr>
-          </thead>
-          <tbody class="text-navy">
-            <tr>
-              <td class="text-muted text-right pr-5 font-medium">Begins</td>
-              <td class="px-4">6:20</td>
-              <td class="px-4">12:15</td>
-              <td class="px-4">2:02</td>
-              <td class="px-4">4:24</td>
-              <td class="px-4">6:01</td>
-            </tr>
-            <tr>
-              <td class="text-muted text-right pr-5 font-medium">Jama'ah</td>
-              <td class="px-4">6:40</td>
-              <td class="px-4">12:45</td>
-              <td class="px-4">3:00</td>
-              <td class="px-4">4:31</td>
-              <td class="px-4">7:30</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Mobile hamburger -->
-      <button id="menu-toggle" class="lg:hidden text-navy p-2 mt-2" aria-label="Open menu">
-        <svg id="menu-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M3 12h18M3 6h18M3 18h18"/>
-        </svg>
-        <svg id="close-icon" class="hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M18 6L6 18M6 6l12 12"/>
-        </svg>
-      </button>
-    </header>
+    <!-- ===== DONATE BAR ===== -->
+    <DonateBar donate={donate} />
 
-    <!-- ===== MOBILE MENU ===== -->
-    <div id="mobile-menu" class="fixed inset-0 bg-white z-50 lg:hidden transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
-      <div class="flex items-center justify-between px-5 pt-4 pb-2">
-        <img src="/images/logo.png" alt="QIS" class="w-[90px] h-auto" />
-        <button id="menu-close" class="text-navy p-2" aria-label="Close menu">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Prayer Times Card -->
-      <div class="mx-5 mt-4 bg-navy rounded-2xl p-5">
-        <div class="flex items-center justify-between text-white/60 text-[13px] mb-3">
-          <span>15 January 2026</span>
-          <span>26 Rajab 1447</span>
-        </div>
-        <div class="grid grid-cols-5 gap-2 text-center text-white">
-          <div>
-            <div class="text-[11px] text-white/50 uppercase tracking-wide mb-1">Fajr</div>
-            <div class="text-[14px] font-bold">6:40</div>
-          </div>
-          <div>
-            <div class="text-[11px] text-white/50 uppercase tracking-wide mb-1">Zuhr</div>
-            <div class="text-[14px] font-bold">12:45</div>
-          </div>
-          <div>
-            <div class="text-[11px] text-white/50 uppercase tracking-wide mb-1">'Asr</div>
-            <div class="text-[14px] font-bold">3:00</div>
-          </div>
-          <div>
-            <div class="text-[11px] text-white/50 uppercase tracking-wide mb-1">Magh</div>
-            <div class="text-[14px] font-bold">4:31</div>
-          </div>
-          <div class="bg-teal/30 rounded-lg py-1 -my-1">
-            <div class="text-[11px] text-teal uppercase tracking-wide mb-1">'Isha</div>
-            <div class="text-[14px] font-bold text-green">7:30</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Links -->
-      <nav class="px-5 pt-6 pb-8">
-        <div class="space-y-1">
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl bg-teal-tint transition-colors">Home</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Salah Times</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Donate</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">About QIS</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Services</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">News</a>
-          <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Contact Us</a>
-        </div>
-      </nav>
-    </div>
-
-    <script>
-      function initMobileMenu() {
-        const menuToggle = document.getElementById('menu-toggle');
-        const menuClose = document.getElementById('menu-close');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = document.getElementById('menu-icon');
-        const closeIcon = document.getElementById('close-icon');
-        const body = document.body;
-
-        function openMenu() {
-          mobileMenu?.classList.remove('translate-x-full');
-          menuIcon?.classList.add('hidden');
-          closeIcon?.classList.remove('hidden');
-          body.style.overflow = 'hidden';
-        }
-
-        function closeMenu() {
-          mobileMenu?.classList.add('translate-x-full');
-          menuIcon?.classList.remove('hidden');
-          closeIcon?.classList.add('hidden');
-          body.style.overflow = '';
-        }
-
-        menuToggle?.addEventListener('click', openMenu);
-        menuClose?.addEventListener('click', closeMenu);
-
-        // Close menu when clicking on a link
-        const menuLinks = mobileMenu?.querySelectorAll('a');
-        menuLinks?.forEach(link => {
-          link.addEventListener('click', closeMenu);
-        });
-      }
-      initMobileMenu();
-    </script>
-
-    <!-- ===== NAVIGATION ===== -->
-    <nav class="relative z-20 bg-teal rounded-b-[24px] hidden lg:flex items-center justify-center gap-1 py-3 text-white text-[15px] font-semibold">
-      <a href="#" class="bg-white/20 px-5 py-2 rounded-xl transition-colors">Home</a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Salah Times</a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Donate</a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
-        About QIS
-        <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-      </a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
-        Services
-        <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-      </a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">News</a>
-      <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Contact Us</a>
-    </nav>
-
-    <!-- ===== HERO BANNER ===== -->
-    <section class="relative lg:-mt-[48px] rounded-b-[24px] md:rounded-b-[40px] overflow-hidden h-[360px] sm:h-[450px] lg:h-[620px]" id="hero-slider">
-      <!-- Slides container -->
-      <div class="hero-slides absolute inset-0">
-        <!-- Slide 1: Ramadan Talks -->
-        <div class="hero-slide absolute inset-0" style="opacity: 1;">
-          <img
-            src="/images/hero.png"
-            alt="Mosque interior with beautiful arches"
-            class="absolute inset-0 w-full h-full object-cover"
-          />
-          <div class="absolute inset-0 bg-black/15"></div>
-          <div class="relative z-10 flex flex-col justify-center h-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pt-12 sm:pt-16 lg:pt-20 pb-[120px] sm:pb-[130px] lg:pb-[160px]">
-            <h1 class="text-white text-[36px] sm:text-[48px] lg:text-[64px] font-bold leading-[1.05] mb-1">Daily Ramadan Talks</h1>
-            <p class="text-white text-[22px] sm:text-[30px] lg:text-[40px] font-medium leading-tight">After Asr & Esha</p>
-            <a
-              href="#"
-              class="mt-5 lg:mt-7 inline-flex items-center bg-white text-navy font-bold text-[14px] sm:text-[16px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl w-fit hover:bg-white/90 transition-colors"
-            >
-              View Schedule
-            </a>
-          </div>
-        </div>
-
-        <!-- Slide 2: Girls' School Open Day -->
-        <div class="hero-slide absolute inset-0" style="opacity: 0;">
-          <img
-            src="/images/hero.png"
-            alt="Quwwat-ul-Islam Girls' School"
-            class="absolute inset-0 w-full h-full object-cover"
-          />
-          <div class="absolute inset-0 bg-black/25"></div>
-          <div class="relative z-10 flex flex-col justify-center h-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pt-12 sm:pt-16 lg:pt-20 pb-[120px] sm:pb-[130px] lg:pb-[160px]">
-            <p class="text-white/90 text-[14px] sm:text-[16px] lg:text-[18px] font-semibold uppercase tracking-wider mb-2 sm:mb-3">EYFS & Primary Open Day</p>
-            <h1 class="text-white text-[32px] sm:text-[44px] lg:text-[58px] font-bold leading-[1.1] mb-2 sm:mb-3 max-w-[800px]">Quwwat-ul-Islam Girls' School</h1>
-            <p class="text-white/90 text-[18px] sm:text-[24px] lg:text-[32px] font-medium leading-tight">Mon 5 Jan 2026 · 9:30 – 12:30</p>
-            <a
-              href="#"
-              class="mt-5 lg:mt-7 inline-flex items-center bg-white text-navy font-bold text-[14px] sm:text-[16px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl w-fit hover:bg-white/90 transition-colors"
-            >
-              Register Now
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Progress bar - positioned higher to avoid donate card overlap -->
-      <div class="absolute bottom-[70px] sm:bottom-[80px] lg:bottom-[110px] left-0 right-0 z-20 px-6 sm:px-10 lg:px-16">
-        <div class="max-w-[1440px] mx-auto">
-          <div class="flex items-center gap-3 max-w-[280px] sm:max-w-[320px]">
-            <span class="text-white/80 text-[12px] sm:text-[13px] font-semibold tabular-nums" id="slide-counter">01 / 02</span>
-            <div class="flex-1 h-[3px] bg-white/30 rounded-full overflow-hidden">
-              <div class="h-full bg-white rounded-full" id="progress-bar" style="width: 0%; transition: none;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- ===== NEWS + PRAYER TIMES ===== -->
+    <section class="px-5 md:px-10 mt-8 lg:mt-10 flex flex-col lg:flex-row gap-6">
+      <NewsSection articles={newsArticles} />
+      <PrayerTimesPanel prayerData={prayers} />
     </section>
 
-    <style>
-      .hero-slide {
-        transition: opacity 0.7s ease-in-out;
-      }
-    </style>
-
-    <script>
-      function initHeroSlider() {
-        const progressBar = document.getElementById('progress-bar') as HTMLElement;
-        const slideCounter = document.getElementById('slide-counter');
-        const slides = document.querySelectorAll('.hero-slide') as NodeListOf<HTMLElement>;
-        const totalSlides = slides.length;
-        const slideDuration = 6000; // 6 seconds per slide
-        let currentSlide = 0;
-        let startTime: number = 0;
-        let animationId: number;
-
-        function updateProgress(timestamp: number) {
-          if (!startTime) startTime = timestamp;
-          const elapsed = timestamp - startTime;
-          const progress = Math.min((elapsed / slideDuration) * 100, 100);
-
-          if (progressBar) {
-            progressBar.style.width = `${progress}%`;
-          }
-
-          if (elapsed < slideDuration) {
-            animationId = requestAnimationFrame(updateProgress);
-          } else {
-            // Move to next slide
-            goToNextSlide();
-          }
-        }
-
-        function goToNextSlide() {
-          // Hide current slide
-          if (slides[currentSlide]) {
-            slides[currentSlide].style.opacity = '0';
-          }
-
-          // Move to next slide (loop)
-          currentSlide = (currentSlide + 1) % totalSlides;
-
-          // Show new slide
-          if (slides[currentSlide]) {
-            slides[currentSlide].style.opacity = '1';
-          }
-
-          // Update counter
-          if (slideCounter) {
-            slideCounter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
-          }
-
-          // Reset and restart progress
-          startTime = 0;
-          if (progressBar) progressBar.style.width = '0%';
-          animationId = requestAnimationFrame(updateProgress);
-        }
-
-        // Start the slider
-        animationId = requestAnimationFrame(updateProgress);
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-          cancelAnimationFrame(animationId);
-        });
-      }
-
-      initHeroSlider();
-    </script>
-
-    <!-- ===== CONTAINED CONTENT ===== -->
-    <div class="max-w-[1440px] mx-auto">
-
-      <!-- ===== DONATE BAR ===== -->
-      <section class="px-5 md:px-10 -mt-[60px] lg:-mt-[100px] relative z-10">
-        <div class="bg-navy rounded-[24px] md:rounded-[32px] lg:rounded-[40px] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-9" id="donate-bar">
-          <!-- Mobile/Tablet: Stacked layout -->
-          <div class="xl:hidden">
-            <!-- Heading -->
-            <h2 class="text-white text-[26px] sm:text-[32px] font-bold leading-tight text-center mb-2">Donate</h2>
-            <p class="text-[13px] sm:text-[14px] leading-[1.7] text-white/70 text-center max-w-[480px] mx-auto mb-6">
-              Your contribution will help us to maintain and develop the wide range of services we offer. Prophet Muhammad &#xFDFA; said: "Allah said: 'Spend, O son of Adam, and I shall spend on you.'"
-            </p>
-
-            <!-- Amount grid -->
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5 mb-4" id="amount-grid-mobile">
-              <button data-amount="5" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">£5</button>
-              <button data-amount="10" class="donate-amount active bg-teal text-white font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">£10</button>
-              <button data-amount="20" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">£20</button>
-              <button data-amount="50" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">£50</button>
-              <button data-amount="100" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">£100</button>
-              <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">Custom</button>
-            </div>
-
-            <!-- Frequency + CTA row -->
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center">
-              <div class="flex gap-2 shrink-0" id="freq-grid-mobile">
-                <button data-freq="once" class="donate-freq active bg-teal text-white font-bold text-[14px] sm:text-[15px] rounded-xl h-[44px] sm:h-[48px] px-5 sm:px-6 hover:bg-teal hover:text-white transition-colors">One Time</button>
-                <button data-freq="monthly" class="donate-freq bg-white text-navy font-bold text-[14px] sm:text-[15px] rounded-xl h-[44px] sm:h-[48px] px-5 sm:px-6 hover:bg-teal hover:text-white transition-colors">Monthly</button>
-              </div>
-              <button class="donate-cta bg-teal text-white font-bold text-[15px] sm:text-[16px] rounded-xl h-[48px] sm:h-[52px] px-8 sm:px-10 flex items-center justify-center gap-2 hover:bg-teal/80 transition-colors w-full sm:w-auto">
-                Donate Now
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Desktop: Horizontal layout -->
-          <div class="hidden xl:flex xl:items-center">
-            <!-- Left: heading + description -->
-            <div class="text-white w-[340px] shrink-0">
-              <h2 class="text-[34px] font-bold leading-tight">Donate</h2>
-              <p class="text-[15px] leading-[1.75] mt-3 text-white/70">
-                Your contribution will help us to maintain and develop the wide range of services we offer. Prophet Muhammad &#xFDFA; said: "Allah said: 'Spend, O son of Adam, and I shall spend on you.'"
-              </p>
-            </div>
-
-            <!-- Separator -->
-            <div class="w-px self-stretch bg-white/15 mx-8"></div>
-
-            <!-- Amount grid -->
-            <div class="grid grid-cols-3 gap-2.5 shrink-0" id="amount-grid-desktop">
-              <button data-amount="5" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors">£5</button>
-              <button data-amount="20" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors">£20</button>
-              <button data-amount="100" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[95px] hover:bg-teal hover:text-white transition-colors">£100</button>
-              <button data-amount="10" class="donate-amount active bg-teal text-white font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors">£10</button>
-              <button data-amount="50" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors">£50</button>
-              <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[95px] hover:bg-teal hover:text-white transition-colors">Custom</button>
-            </div>
-
-            <!-- Separator -->
-            <div class="w-px self-stretch bg-white/15 mx-8"></div>
-
-            <!-- Frequency toggle -->
-            <div class="flex flex-col gap-2.5 shrink-0" id="freq-grid-desktop">
-              <button data-freq="once" class="donate-freq active bg-teal text-white font-bold text-[18px] rounded-2xl h-[50px] w-[140px] hover:bg-teal hover:text-white transition-colors">One Time</button>
-              <button data-freq="monthly" class="donate-freq bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[140px] hover:bg-teal hover:text-white transition-colors">Monthly</button>
-            </div>
-
-            <!-- Separator -->
-            <div class="w-px self-stretch bg-white/15 mx-8"></div>
-
-            <!-- CTA -->
-            <button class="donate-cta bg-teal text-white font-bold text-[18px] rounded-2xl h-[54px] px-8 flex items-center justify-center gap-2.5 hover:bg-teal/80 transition-colors">
-              Donate Now
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <script>
-        function initDonateBar() {
-          const amountBtns = document.querySelectorAll('.donate-amount');
-          const freqBtns = document.querySelectorAll('.donate-freq');
-
-          function activate(group: NodeListOf<Element>, clicked: Element) {
-            group.forEach(btn => {
-              btn.classList.remove('active', 'bg-teal', 'text-white');
-              btn.classList.add('bg-white', 'text-navy');
-            });
-            clicked.classList.remove('bg-white', 'text-navy');
-            clicked.classList.add('active', 'bg-teal', 'text-white');
-          }
-
-          // Sync selection across mobile/desktop versions
-          amountBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-              const amount = btn.getAttribute('data-amount');
-              // Activate all buttons with the same amount (syncs mobile/desktop)
-              amountBtns.forEach(b => {
-                if (b.getAttribute('data-amount') === amount) {
-                  b.classList.remove('bg-white', 'text-navy');
-                  b.classList.add('active', 'bg-teal', 'text-white');
-                } else {
-                  b.classList.remove('active', 'bg-teal', 'text-white');
-                  b.classList.add('bg-white', 'text-navy');
-                }
-              });
-            });
-          });
-
-          freqBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-              const freq = btn.getAttribute('data-freq');
-              // Activate all buttons with the same freq (syncs mobile/desktop)
-              freqBtns.forEach(b => {
-                if (b.getAttribute('data-freq') === freq) {
-                  b.classList.remove('bg-white', 'text-navy');
-                  b.classList.add('active', 'bg-teal', 'text-white');
-                } else {
-                  b.classList.remove('active', 'bg-teal', 'text-white');
-                  b.classList.add('bg-white', 'text-navy');
-                }
-              });
-            });
-          });
-        }
-        initDonateBar();
-      </script>
-
-      <!-- ===== NEWS + PRAYER TIMES ===== -->
-      <section class="px-5 md:px-10 mt-8 lg:mt-10 flex flex-col lg:flex-row gap-6">
-        <!-- News -->
-        <div class="bg-teal-tint rounded-[24px] lg:rounded-[40px] p-6 md:p-8 lg:p-10 flex-[1.5] min-w-0">
-          <div class="flex items-baseline justify-between mb-5 lg:mb-7">
-            <h2 class="text-[24px] md:text-[28px] lg:text-[32px] font-bold leading-tight">Latest News & Announcements</h2>
-            <a href="#" class="text-teal text-[14px] lg:text-[16px] font-medium border border-teal rounded-full px-4 lg:px-5 py-1.5 lg:py-2 hover:bg-teal hover:text-white transition-colors whitespace-nowrap">See all news</a>
-          </div>
-
-          <div class="relative rounded-xl lg:rounded-2xl overflow-hidden aspect-[672/280] mb-5 lg:mb-7">
-            <img src="/images/quran-revision.png" alt="Qur'an Revision Day 2026" class="absolute inset-0 w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-5 md:p-8">
-              <h3 class="text-white text-[22px] md:text-[26px] lg:text-[30px] font-medium leading-tight">Qur'an Revision Day 2026</h3>
-              <p class="text-white/90 text-[13px] lg:text-[15px] leading-relaxed mt-1.5 lg:mt-2 max-w-[560px]">A great opportunity for you to revise the Qur'an and spend the whole day in the house of Allah!</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 lg:gap-6">
-            <a href="#" class="group">
-              <div class="rounded-lg lg:rounded-xl overflow-hidden aspect-[322/126]">
-                <img src="/images/courage-carry-islam.png" alt="The Courage to Carry Islam" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-              <h3 class="text-[16px] lg:text-[20px] font-medium leading-snug mt-2 lg:mt-3 group-hover:text-teal transition-colors">The Courage to Carry Islam</h3>
-            </a>
-            <a href="#" class="group">
-              <div class="rounded-lg lg:rounded-xl overflow-hidden aspect-[322/126]">
-                <img src="/images/elm-courses.png" alt="ELM Courses" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-              <h3 class="text-[16px] lg:text-[20px] font-medium leading-snug mt-2 lg:mt-3 group-hover:text-teal transition-colors">The Manners of Faith: Exploring Surat al-Hujurat</h3>
-            </a>
-          </div>
-        </div>
-
-        <!-- Prayer Times -->
-        <div class="bg-teal-tint rounded-[24px] lg:rounded-[40px] pt-8 lg:pt-10 pb-6 lg:pb-8 px-6 lg:px-8 lg:w-[420px] lg:shrink-0 flex flex-col">
-          <h2 class="text-[28px] lg:text-[34px] font-bold text-center leading-tight">Prayer Times</h2>
-          <p class="text-gray-text text-[20px] lg:text-[24px] font-bold text-center mt-1 lg:mt-1.5 mb-4 lg:mb-6">15th January 2026</p>
-
-          <!-- Next prayer -->
-          <div class="bg-navy rounded-xl lg:rounded-2xl px-5 lg:px-7 py-4 lg:py-5 mb-4 lg:mb-5 flex items-center justify-between">
-            <div>
-              <span class="text-white/50 text-[12px] lg:text-[13px] font-semibold uppercase tracking-[1px]">Next Prayer</span>
-              <div class="text-white text-[24px] lg:text-[28px] font-bold leading-tight mt-0.5">Isha</div>
-            </div>
-            <div class="text-right">
-              <span class="text-white/50 text-[12px] lg:text-[13px] font-semibold uppercase tracking-[1px]">Jama'ah</span>
-              <div class="text-green text-[24px] lg:text-[28px] font-bold leading-tight mt-0.5">7:30 PM</div>
-            </div>
-          </div>
-
-          <!-- Table -->
-          <div class="rounded-xl lg:rounded-2xl overflow-hidden flex-1 flex flex-col">
-            <div class="bg-navy text-white font-bold text-[16px] lg:text-[20px] flex py-3 lg:py-4 px-5 lg:px-7">
-              <span class="w-[38%]">Prayer</span>
-              <span class="w-[31%] text-center">Begins</span>
-              <span class="w-[31%] text-right">Jama'ah</span>
-            </div>
-
-            <div class="flex-1 flex flex-col justify-evenly bg-white">
-              {prayerData.map((prayer, i) => (
-                <div class={`flex items-center py-3 lg:py-4 px-5 lg:px-7 text-[16px] lg:text-[20px] ${prayer.name === 'Esha' ? 'bg-green/15 border-l-4 border-green' : i % 2 === 1 ? 'bg-navy/[0.03]' : ''}`}>
-                  <span class={`w-[38%] font-bold ${prayer.name === 'Esha' ? 'text-green' : ''}`}>{prayer.name}</span>
-                  <span class={`w-[31%] text-center font-medium ${prayer.name === 'Esha' ? 'text-green' : ''}`}>{prayer.begins}</span>
-                  <span class={`w-[31%] text-right font-medium ${prayer.name === 'Esha' ? 'text-green' : ''}`}>{prayer.jamaah}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <a href="#" class="text-teal text-[14px] lg:text-[16px] font-medium border border-teal rounded-full px-4 lg:px-5 py-1.5 lg:py-2 hover:bg-teal hover:text-white transition-colors inline-block mx-auto mt-5 lg:mt-6">View Full Timetable</a>
-        </div>
-      </section>
-
-      <!-- ===== QUICK LINKS ===== -->
-      <section class="px-5 md:px-10 pt-12 lg:pt-16 pb-10 lg:pb-12">
-        <div class="flex items-baseline justify-between mb-8 lg:mb-10">
-          <h2 class="text-[26px] lg:text-[32px] font-bold">Quick Links</h2>
-          <a href="#" class="text-teal text-[14px] lg:text-[16px] font-medium border border-teal rounded-full px-4 lg:px-5 py-1.5 lg:py-2 hover:bg-teal hover:text-white transition-colors">View all</a>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-          {quickLinks.map((item) => (
-            <a
-              href="#"
-              class="group border border-navy/10 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-6 lg:py-8 flex flex-col items-center text-center hover:border-teal hover:shadow-lg hover:shadow-teal/8 transition-all duration-200"
-            >
-              <div class="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center mb-4 lg:mb-5 text-teal group-hover:scale-110 transition-transform duration-200">
-                <svg class="w-8 h-8 lg:w-10 lg:h-10" viewBox="0 0 24 24" fill="currentColor" set:html={item.icon} />
-              </div>
-              <span class="text-[15px] lg:text-[18px] font-bold text-navy">{item.label}</span>
-            </a>
-          ))}
-        </div>
-      </section>
-    </div>
-
-    <!-- ===== FOOTER ===== -->
-    <footer class="bg-light-bg">
-      <div class="max-w-[1440px] mx-auto px-5 md:px-10 pt-10 lg:pt-14 pb-8 lg:pb-10">
-        <img src="/images/logo.png" alt="QIS Logo" class="w-[120px] lg:w-[140px] mb-3" />
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10">
-          <!-- Address -->
-          <div class="col-span-2 sm:col-span-1">
-            <address class="not-italic text-[14px] lg:text-[15px] leading-[1.85] text-navy">
-              Quwwat-ul-Islam Masjid<br />
-              62, 66 Upton Ln,<br />
-              London, E7 9LN
-            </address>
-            <a href="#" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
-          </div>
-
-          <!-- About -->
-          <div>
-            <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">About</h4>
-            <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">About QIS</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Services</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Roles</a></li>
-            </ul>
-          </div>
-
-          <!-- Features -->
-          <div>
-            <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Features</h4>
-            <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Donate Online</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Prayer Times</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Mobile App</a></li>
-            </ul>
-          </div>
-
-          <!-- Information -->
-          <div>
-            <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Information</h4>
-            <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Announcements</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Facilities</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Schools</a></li>
-            </ul>
-          </div>
-
-          <!-- Help -->
-          <div>
-            <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Help</h4>
-            <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Contact Us</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Application Forms</a></li>
-              <li><a href="#" class="text-teal hover:text-navy transition-colors">Become a Member</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-navy text-white py-4 lg:py-5">
-        <div class="max-w-[1440px] mx-auto px-5 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-2 text-[13px] lg:text-[14px]">
-          <span class="text-white/70">&copy; 2026 Quwwat-ul-Islam Society. All rights reserved.</span>
-          <span class="text-white/50 text-[12px]">Registered Charity No. 1201384</span>
-        </div>
-      </div>
-    </footer>
-
-  </body>
-</html>
+    <!-- ===== QUICK LINKS ===== -->
+    <QuickLinks cards={quickLinkCards} columns={quickLinkColumns} />
+  </div>
+</Base>

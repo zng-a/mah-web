@@ -1,0 +1,124 @@
+---
+import { mediaUrl } from '../lib/payload';
+import type { HeroSlide } from '../lib/payload';
+
+interface Props {
+  slides: HeroSlide[];
+  autoAdvance?: number;
+}
+
+const { slides, autoAdvance = 6 } = Astro.props;
+const totalSlides = slides.length;
+const slideDuration = (autoAdvance || 6) * 1000;
+---
+
+<section class="relative lg:-mt-[48px] rounded-b-[24px] md:rounded-b-[40px] overflow-hidden h-[360px] sm:h-[450px] lg:h-[620px]" id="hero-slider">
+  <!-- Slides container -->
+  <div class="hero-slides absolute inset-0">
+    {slides.map((slide, i) => {
+      const imgSrc = mediaUrl(slide.image, 'hero') || '/images/hero.png';
+      const imgAlt = (typeof slide.image === 'object' ? slide.image.alt : slide.title) ?? slide.title;
+      return (
+        <div class="hero-slide absolute inset-0" style={`opacity: ${i === 0 ? 1 : 0};`}>
+          <img
+            src={imgSrc}
+            alt={imgAlt}
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+          <div class={`absolute inset-0 ${slide.kicker ? 'bg-black/25' : 'bg-black/15'}`}></div>
+          <div class="relative z-10 flex flex-col justify-center h-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pt-12 sm:pt-16 lg:pt-20 pb-[120px] sm:pb-[130px] lg:pb-[160px]">
+            {slide.kicker && (
+              <p class="text-white/90 text-[14px] sm:text-[16px] lg:text-[18px] font-semibold uppercase tracking-wider mb-2 sm:mb-3">{slide.kicker}</p>
+            )}
+            <h1 class="text-white text-[36px] sm:text-[48px] lg:text-[64px] font-bold leading-[1.05] mb-1 max-w-[800px]">{slide.title}</h1>
+            {slide.subtitle && (
+              <p class="text-white text-[22px] sm:text-[30px] lg:text-[40px] font-medium leading-tight">{slide.subtitle}</p>
+            )}
+            {slide.ctaLabel && (
+              <a
+                href={slide.ctaUrl || '#'}
+                class="mt-5 lg:mt-7 inline-flex items-center bg-white text-navy font-bold text-[14px] sm:text-[16px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl w-fit hover:bg-white/90 transition-colors"
+              >
+                {slide.ctaLabel}
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Progress bar -->
+  <div class="absolute bottom-[70px] sm:bottom-[80px] lg:bottom-[110px] left-0 right-0 z-20 px-6 sm:px-10 lg:px-16">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="flex items-center gap-3 max-w-[280px] sm:max-w-[320px]">
+        <span class="text-white/80 text-[12px] sm:text-[13px] font-semibold tabular-nums" id="slide-counter">01 / {String(totalSlides).padStart(2, '0')}</span>
+        <div class="flex-1 h-[3px] bg-white/30 rounded-full overflow-hidden">
+          <div class="h-full bg-white rounded-full" id="progress-bar" style="width: 0%; transition: none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-slide {
+    transition: opacity 0.7s ease-in-out;
+  }
+</style>
+
+<script define:vars={{ slideDuration }}>
+  function initHeroSlider() {
+    const progressBar = document.getElementById('progress-bar');
+    const slideCounter = document.getElementById('slide-counter');
+    const slides = document.querySelectorAll('.hero-slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+    let startTime = 0;
+    let animationId;
+
+    function updateProgress(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min((elapsed / slideDuration) * 100, 100);
+
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
+
+      if (elapsed < slideDuration) {
+        animationId = requestAnimationFrame(updateProgress);
+      } else {
+        goToNextSlide();
+      }
+    }
+
+    function goToNextSlide() {
+      if (slides[currentSlide]) {
+        slides[currentSlide].style.opacity = '0';
+      }
+
+      currentSlide = (currentSlide + 1) % totalSlides;
+
+      if (slides[currentSlide]) {
+        slides[currentSlide].style.opacity = '1';
+      }
+
+      if (slideCounter) {
+        slideCounter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      }
+
+      startTime = 0;
+      if (progressBar) progressBar.style.width = '0%';
+      animationId = requestAnimationFrame(updateProgress);
+    }
+
+    animationId = requestAnimationFrame(updateProgress);
+
+    window.addEventListener('beforeunload', () => {
+      cancelAnimationFrame(animationId);
+    });
+  }
+
+  initHeroSlider();
+</script>

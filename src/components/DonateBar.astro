@@ -1,0 +1,162 @@
+---
+import type { DonateSettings } from '../lib/payload';
+
+interface Props {
+  donate: DonateSettings;
+}
+
+const { donate } = Astro.props;
+
+const amounts = donate.amounts?.map(a => a.value) ?? [5, 10, 20, 50, 100];
+const defaultAmount = donate.defaultAmount ?? 10;
+const frequencies = donate.frequencies ?? [
+  { label: 'One Time', value: 'once' },
+  { label: 'Monthly', value: 'monthly' },
+];
+const defaultFrequency = donate.defaultFrequency ?? 'once';
+const heading = donate.heading ?? 'Donate';
+const description = donate.description ?? 'Your contribution will help us to maintain and develop the wide range of services we offer. Prophet Muhammad \uFDFA said: "Allah said: \'Spend, O son of Adam, and I shall spend on you.\'"';
+const ctaText = donate.ctaText ?? 'Donate Now';
+const ctaUrl = donate.ctaUrl ?? '#';
+---
+
+<section class="px-5 md:px-10 -mt-[60px] lg:-mt-[100px] relative z-10">
+  <div class="bg-navy rounded-[24px] md:rounded-[32px] lg:rounded-[40px] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-9" id="donate-bar">
+    <!-- Mobile/Tablet: Stacked layout -->
+    <div class="xl:hidden">
+      <!-- Heading -->
+      <h2 class="text-white text-[26px] sm:text-[32px] font-bold leading-tight text-center mb-2">{heading}</h2>
+      <p class="text-[13px] sm:text-[14px] leading-[1.7] text-white/70 text-center max-w-[480px] mx-auto mb-6">
+        {description}
+      </p>
+
+      <!-- Amount grid -->
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5 mb-4" id="amount-grid-mobile">
+        {amounts.map((amount) => (
+          <button
+            data-amount={amount}
+            class={`donate-amount font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors ${amount === defaultAmount ? 'active bg-teal text-white' : 'bg-white text-navy'}`}
+          >
+            &pound;{amount}
+          </button>
+        ))}
+        <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">Custom</button>
+      </div>
+
+      <!-- Frequency + CTA row -->
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center">
+        <div class="flex gap-2 shrink-0" id="freq-grid-mobile">
+          {frequencies.map((freq) => (
+            <button
+              data-freq={freq.value}
+              class={`donate-freq font-bold text-[14px] sm:text-[15px] rounded-xl h-[44px] sm:h-[48px] px-5 sm:px-6 hover:bg-teal hover:text-white transition-colors ${freq.value === defaultFrequency ? 'active bg-teal text-white' : 'bg-white text-navy'}`}
+            >
+              {freq.label}
+            </button>
+          ))}
+        </div>
+        <a href={ctaUrl} class="donate-cta bg-teal text-white font-bold text-[15px] sm:text-[16px] rounded-xl h-[48px] sm:h-[52px] px-8 sm:px-10 flex items-center justify-center gap-2 hover:bg-teal/80 transition-colors w-full sm:w-auto">
+          {ctaText}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Desktop: Horizontal layout -->
+    <div class="hidden xl:flex xl:items-center">
+      <!-- Left: heading + description -->
+      <div class="text-white w-[340px] shrink-0">
+        <h2 class="text-[34px] font-bold leading-tight">{heading}</h2>
+        <p class="text-[15px] leading-[1.75] mt-3 text-white/70">
+          {description}
+        </p>
+      </div>
+
+      <!-- Separator -->
+      <div class="w-px self-stretch bg-white/15 mx-8"></div>
+
+      <!-- Amount grid — interleaved: odd indices on top row, even on bottom (matches original £5/£20/£100 then £10/£50/Custom) -->
+      <div class="grid grid-cols-3 gap-2.5 shrink-0" id="amount-grid-desktop">
+        {amounts.filter((_, i) => i % 2 === 0).map((amount) => (
+          <button
+            data-amount={amount}
+            class={`donate-amount font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors ${amount === defaultAmount ? 'active bg-teal text-white' : 'bg-white text-navy'}`}
+          >
+            &pound;{amount}
+          </button>
+        ))}
+        {amounts.filter((_, i) => i % 2 === 1).map((amount) => (
+          <button
+            data-amount={amount}
+            class={`donate-amount font-bold text-[18px] rounded-2xl h-[50px] w-[85px] hover:bg-teal hover:text-white transition-colors ${amount === defaultAmount ? 'active bg-teal text-white' : 'bg-white text-navy'}`}
+          >
+            &pound;{amount}
+          </button>
+        ))}
+        <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[95px] hover:bg-teal hover:text-white transition-colors">Custom</button>
+      </div>
+
+      <!-- Separator -->
+      <div class="w-px self-stretch bg-white/15 mx-8"></div>
+
+      <!-- Frequency toggle -->
+      <div class="flex flex-col gap-2.5 shrink-0" id="freq-grid-desktop">
+        {frequencies.map((freq) => (
+          <button
+            data-freq={freq.value}
+            class={`donate-freq font-bold text-[18px] rounded-2xl h-[50px] w-[140px] hover:bg-teal hover:text-white transition-colors ${freq.value === defaultFrequency ? 'active bg-teal text-white' : 'bg-white text-navy'}`}
+          >
+            {freq.label}
+          </button>
+        ))}
+      </div>
+
+      <!-- Separator -->
+      <div class="w-px self-stretch bg-white/15 mx-8"></div>
+
+      <!-- CTA -->
+      <a href={ctaUrl} class="donate-cta bg-teal text-white font-bold text-[18px] rounded-2xl h-[54px] px-8 flex items-center justify-center gap-2.5 hover:bg-teal/80 transition-colors">
+        {ctaText}
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initDonateBar() {
+    const amountBtns = document.querySelectorAll('.donate-amount');
+    const freqBtns = document.querySelectorAll('.donate-freq');
+
+    amountBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const amount = btn.getAttribute('data-amount');
+        amountBtns.forEach(b => {
+          if (b.getAttribute('data-amount') === amount) {
+            b.classList.remove('bg-white', 'text-navy');
+            b.classList.add('active', 'bg-teal', 'text-white');
+          } else {
+            b.classList.remove('active', 'bg-teal', 'text-white');
+            b.classList.add('bg-white', 'text-navy');
+          }
+        });
+      });
+    });
+
+    freqBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const freq = btn.getAttribute('data-freq');
+        freqBtns.forEach(b => {
+          if (b.getAttribute('data-freq') === freq) {
+            b.classList.remove('bg-white', 'text-navy');
+            b.classList.add('active', 'bg-teal', 'text-white');
+          } else {
+            b.classList.remove('active', 'bg-teal', 'text-white');
+            b.classList.add('bg-white', 'text-navy');
+          }
+        });
+      });
+    });
+  }
+  initDonateBar();
+</script>

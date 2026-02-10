@@ -1,0 +1,53 @@
+---
+import type { PrayerTimesData } from '../lib/prayer-times';
+
+interface Props {
+  prayerData: PrayerTimesData;
+}
+
+const { prayerData } = Astro.props;
+const nextPrayerName = prayerData.nextPrayer?.name ?? null;
+---
+
+<div class="bg-teal-tint rounded-[24px] lg:rounded-[40px] pt-8 lg:pt-10 pb-6 lg:pb-8 px-6 lg:px-8 lg:w-[420px] lg:shrink-0 flex flex-col">
+  <h2 class="text-[28px] lg:text-[34px] font-bold text-center leading-tight">Prayer Times</h2>
+  <p class="text-gray-text text-[20px] lg:text-[24px] font-bold text-center mt-1 lg:mt-1.5 mb-4 lg:mb-6">{prayerData.date}</p>
+
+  <!-- Next prayer -->
+  {prayerData.nextPrayer && (
+    <div class="bg-navy rounded-xl lg:rounded-2xl px-5 lg:px-7 py-4 lg:py-5 mb-4 lg:mb-5 flex items-center justify-between">
+      <div>
+        <span class="text-white/50 text-[12px] lg:text-[13px] font-semibold uppercase tracking-[1px]">Next Prayer</span>
+        <div class="text-white text-[24px] lg:text-[28px] font-bold leading-tight mt-0.5">{prayerData.nextPrayer.name}</div>
+      </div>
+      <div class="text-right">
+        <span class="text-white/50 text-[12px] lg:text-[13px] font-semibold uppercase tracking-[1px]">Jama'ah</span>
+        <div class="text-green text-[24px] lg:text-[28px] font-bold leading-tight mt-0.5">{prayerData.nextPrayer.jamaah} PM</div>
+      </div>
+    </div>
+  )}
+
+  <!-- Table -->
+  <div class="rounded-xl lg:rounded-2xl overflow-hidden flex-1 flex flex-col">
+    <div class="bg-navy text-white font-bold text-[16px] lg:text-[20px] flex py-3 lg:py-4 px-5 lg:px-7">
+      <span class="w-[38%]">Prayer</span>
+      <span class="w-[31%] text-center">Begins</span>
+      <span class="w-[31%] text-right">Jama'ah</span>
+    </div>
+
+    <div class="flex-1 flex flex-col justify-evenly bg-white">
+      {prayerData.prayers.map((prayer, i) => {
+        const isNext = prayer.name === nextPrayerName;
+        return (
+          <div class={`flex items-center py-3 lg:py-4 px-5 lg:px-7 text-[16px] lg:text-[20px] ${isNext ? 'bg-green/15 border-l-4 border-green' : i % 2 === 1 ? 'bg-navy/[0.03]' : ''}`}>
+            <span class={`w-[38%] font-bold ${isNext ? 'text-green' : ''}`}>{prayer.name}</span>
+            <span class={`w-[31%] text-center font-medium ${isNext ? 'text-green' : ''}`}>{prayer.begins}</span>
+            <span class={`w-[31%] text-right font-medium ${isNext ? 'text-green' : ''}`}>{prayer.jamaah}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <a href="/salah-times" class="text-teal text-[14px] lg:text-[16px] font-medium border border-teal rounded-full px-4 lg:px-5 py-1.5 lg:py-2 hover:bg-teal hover:text-white transition-colors inline-block mx-auto mt-5 lg:mt-6">View Full Timetable</a>
+</div>
