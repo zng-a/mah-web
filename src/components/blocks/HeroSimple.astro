@@ -1,0 +1,27 @@
+---
+import { mediaUrl } from '../../lib/payload';
+
+interface Props {
+  block: {
+    image?: unknown;
+    title: string;
+    subtitle?: string | null;
+    overlayOpacity?: string | null;
+  };
+}
+
+const { block } = Astro.props;
+const imgSrc = mediaUrl(block.image as any, 'hero') || '/images/hero.jpeg';
+const opacity = block.overlayOpacity === '40' ? 'bg-black/40' : block.overlayOpacity === '15' ? 'bg-black/15' : 'bg-black/25';
+---
+
+<section class="relative rounded-b-[24px] md:rounded-b-[40px] overflow-hidden h-[280px] sm:h-[350px] lg:h-[450px]">
+  <img src={imgSrc} alt={block.title} class="absolute inset-0 w-full h-full object-cover" />
+  <div class={`absolute inset-0 ${opacity}`}></div>
+  <div class="relative z-10 flex flex-col justify-end h-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pb-10 lg:pb-14">
+    <h1 class="text-white text-[32px] sm:text-[42px] lg:text-[56px] font-bold leading-[1.1] max-w-[700px]">{block.title}</h1>
+    {block.subtitle && (
+      <p class="text-white/90 text-[18px] sm:text-[22px] lg:text-[28px] font-medium mt-2">{block.subtitle}</p>
+    )}
+  </div>
+</section>

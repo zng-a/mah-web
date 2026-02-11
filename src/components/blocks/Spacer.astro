@@ -1,0 +1,13 @@
+---
+interface Props {
+  block: {
+    size?: 'sm' | 'md' | 'lg' | 'xl' | null;
+  };
+}
+
+const { block } = Astro.props;
+const sizeMap: Record<string, string> = { sm: 'h-4', md: 'h-8', lg: 'h-12', xl: 'h-16' };
+const cls = sizeMap[block.size ?? 'md'] ?? 'h-8';
+---
+
+<div class={cls}></div>

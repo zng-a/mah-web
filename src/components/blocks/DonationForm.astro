@@ -1,0 +1,695 @@
+---
+import type { DonationFund } from '../../lib/payload';
+
+interface Props {
+  block: {
+    heading?: string | null;
+    description?: string | null;
+    funds?: (string | DonationFund)[] | null;
+    amounts?: { value: number; id?: string | null }[] | null;
+    frequencies?: { label: string; value: string; id?: string | null }[] | null;
+    style?: 'card' | 'full' | null;
+    publishableKey?: string | null;
+  };
+}
+
+const { block } = Astro.props;
+
+const heading = block.heading ?? 'Support Your Masjid';
+const description = block.description ?? '';
+const style = block.style ?? 'card';
+const publishableKey = block.publishableKey ?? '';
+
+const funds: DonationFund[] = (block.funds ?? []).filter(
+  (f): f is DonationFund => typeof f === 'object' && f !== null
+);
+
+const amounts = block.amounts?.length
+  ? block.amounts.map(a => a.value)
+  : [10, 20, 30, 50, 75, 100];
+
+const frequencies = block.frequencies?.length
+  ? block.frequencies
+  : [
+      { label: 'One-off', value: 'one-off' },
+      { label: 'Weekly', value: 'weekly' },
+      { label: 'Monthly', value: 'monthly' },
+      { label: 'Yearly', value: 'yearly' },
+    ];
+
+const defaultAmount = amounts[2] ?? amounts[0] ?? 30;
+const defaultFrequency = frequencies[0]?.value ?? 'one-off';
+const defaultFund = funds[0] ?? null;
+const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? v;
+---
+
+<section class={style === 'full' ? 'py-12 sm:py-16 px-5 md:px-10 bg-light-bg' : 'py-12 sm:py-16 px-5 md:px-10'}>
+  <div class="max-w-[580px] mx-auto">
+    <div
+      class={`donation-form ${style === 'card' ? 'bg-white rounded-[28px] shadow-[0_4px_40px_rgba(15,36,62,0.08)] overflow-hidden' : ''}`}
+      data-default-amount={defaultAmount}
+      data-default-frequency={defaultFrequency}
+      data-default-fund-id={defaultFund?.id ?? ''}
+      data-default-fund-name={defaultFund?.name ?? ''}
+      data-publishable-key={publishableKey}
+    >
+      <!-- ═══ Header ═══ -->
+      <div class="bg-navy px-6 sm:px-8 pt-7 pb-6 text-center">
+        <h2 class="text-white text-[26px] sm:text-[32px] font-bold tracking-[-0.01em] mb-1">{heading}</h2>
+        {description ? (
+          <p class="text-white/60 text-[14px] sm:text-[15px] leading-[1.65] max-w-[400px] mx-auto">{description}</p>
+        ) : (
+          <p class="text-white/60 text-[14px] sm:text-[15px] leading-[1.65]">Your generosity makes a lasting difference</p>
+        )}
+      </div>
+
+      <div class="px-6 sm:px-8 pt-6 pb-8">
+        <!-- ═══ Fund Selector ═══ -->
+        {funds.length > 1 && (
+          <div class="mb-6">
+            <label class="df-label">Donate to</label>
+            <div class="flex flex-wrap gap-[6px] df-fund-grid">
+              {funds.map((fund) => (
+                <button
+                  type="button"
+                  data-fund-id={fund.id}
+                  data-fund-name={fund.name}
+                  class={`df-fund-btn text-[13px] sm:text-[14px] font-semibold rounded-full h-[36px] px-4 transition-all duration-200 ${
+                    fund.id === defaultFund?.id
+                      ? 'bg-navy text-white shadow-sm'
+                      : 'bg-navy/[0.04] text-navy hover:bg-navy/[0.08]'
+                  }`}
+                >
+                  {fund.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- ═══ Amount Grid ═══ -->
+        <div class="mb-5">
+          <label class="df-label">Amount</label>
+          <div class="grid grid-cols-3 gap-[6px] df-amount-grid">
+            {amounts.map((amount) => (
+              <button
+                type="button"
+                data-amount={amount}
+                class={`df-amount group relative font-bold text-[17px] rounded-[14px] h-[52px] transition-all duration-200 ${
+                  amount === defaultAmount
+                    ? 'bg-teal text-white shadow-[0_2px_12px_rgba(68,131,158,0.3)]'
+                    : 'bg-navy/[0.04] text-navy hover:bg-navy/[0.08]'
+                }`}
+              >
+                <span class="text-[13px] font-medium opacity-60 mr-[1px]">&pound;</span>{amount}
+              </button>
+            ))}
+            <button type="button" data-amount="custom" class="df-amount bg-navy/[0.04] text-navy font-bold text-[15px] rounded-[14px] h-[52px] hover:bg-navy/[0.08] transition-all duration-200">
+              Other
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom amount input -->
+        <div class="df-custom-row" style="display:none;">
+          <div class="flex items-center gap-1 bg-navy/[0.04] rounded-[14px] h-[52px] px-4 mb-5 focus-within:ring-2 focus-within:ring-teal/40 transition-all">
+            <span class="text-navy text-[20px] font-bold">&pound;</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              placeholder="Enter amount"
+              class="df-custom-input w-full bg-transparent text-navy font-bold text-[20px] outline-none placeholder:text-navy/30 placeholder:font-medium placeholder:text-[16px]"
+            />
+          </div>
+        </div>
+
+        <!-- ═══ Frequency ═══ -->
+        <div class="mb-6">
+          <label class="df-label">Frequency</label>
+          <div class="grid grid-cols-4 gap-[6px] df-freq-grid">
+            {frequencies.map((freq) => (
+              <button
+                type="button"
+                data-freq={freq.value}
+                data-freq-label={freq.label}
+                class={`df-freq font-semibold text-[13px] sm:text-[14px] rounded-[12px] h-[42px] transition-all duration-200 ${
+                  freq.value === defaultFrequency
+                    ? 'bg-navy text-white'
+                    : 'bg-navy/[0.04] text-navy hover:bg-navy/[0.08]'
+                }`}
+              >
+                {freq.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- ═══ Divider ═══ -->
+        <div class="h-px bg-navy/[0.06] mb-6"></div>
+
+        <!-- ═══ Gift Aid ═══ -->
+        <div class="df-giftaid-wrap mb-6">
+          <div class="bg-green-tint border border-green/15 rounded-[16px] p-4 sm:p-5">
+            <label class="flex items-start gap-3 cursor-pointer select-none">
+              <div class="relative mt-[2px] shrink-0">
+                <input type="checkbox" class="df-giftaid-check peer sr-only" />
+                <div class="w-[22px] h-[22px] rounded-[6px] border-2 border-green/30 bg-white peer-checked:bg-green peer-checked:border-green transition-all duration-200 flex items-center justify-center">
+                  <svg class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L4 8.5L11 1.5"/></svg>
+                </div>
+                <!-- The peer-checked SVG trick won't work with sr-only, use JS instead -->
+              </div>
+              <div>
+                <span class="block text-navy text-[15px] sm:text-[16px] font-bold leading-snug">
+                  Add Gift Aid
+                  <span class="inline-block ml-1.5 bg-green/10 text-green text-[11px] sm:text-[12px] font-bold px-2 py-[2px] rounded-full align-middle">
+                    +25%
+                  </span>
+                </span>
+                <span class="block text-navy/60 text-[13px] sm:text-[14px] leading-[1.5] mt-0.5">
+                  Make your <span class="df-giftaid-amount font-semibold text-navy/80">&pound;{defaultAmount}</span> worth
+                  <span class="df-giftaid-total font-bold text-green">&pound;{Math.round(defaultAmount * 1.25 * 100) / 100}</span>
+                  at no extra cost
+                </span>
+              </div>
+            </label>
+
+            <!-- Gift Aid expanded fields -->
+            <div class="df-giftaid-fields" style="display:none;">
+              <div class="mt-4 pt-4 border-t border-green/10">
+                <!-- Declaration -->
+                <p class="text-[12px] sm:text-[13px] text-navy/50 leading-[1.6] mb-4">
+                  I confirm I am a UK taxpayer and understand that if I pay less Income Tax and/or
+                  Capital Gains Tax than the amount of Gift Aid claimed on all my donations in that tax
+                  year it is my responsibility to pay any difference.
+                </p>
+
+                <!-- Name row -->
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="First name"
+                    autocomplete="given-name"
+                    class="df-input"
+                  />
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Last name"
+                    autocomplete="family-name"
+                    class="df-input"
+                  />
+                </div>
+
+                <!-- Address -->
+                <input type="text" name="address1" placeholder="Address line 1" autocomplete="address-line1" class="df-input mb-2" />
+                <input type="text" name="address2" placeholder="Address line 2 (optional)" autocomplete="address-line2" class="df-input mb-2" />
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" name="city" placeholder="City" autocomplete="address-level2" class="df-input" />
+                  <input type="text" name="postcode" placeholder="Postcode" autocomplete="postal-code" class="df-input" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Divider ═══ -->
+        <div class="h-px bg-navy/[0.06] mb-6"></div>
+
+        <!-- ═══ Your Details ═══ -->
+        <div class="mb-5">
+          <label class="df-label">Your email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+            class="df-input w-full"
+          />
+        </div>
+
+        <!-- ═══ Card Payment ═══ -->
+        <div class="mb-6">
+          <label class="df-label">Card details</label>
+          <div id="card-element" class="bg-navy/[0.04] rounded-[14px] py-[15px] px-4 transition-all focus-within:ring-2 focus-within:ring-teal/40"></div>
+          <div id="card-errors" class="text-red-500 text-[13px] mt-1.5 hidden"></div>
+        </div>
+
+        <!-- ═══ Donate Button ═══ -->
+        <button
+          type="button"
+          class="df-cta-btn group w-full bg-teal text-white font-bold text-[17px] sm:text-[18px] rounded-[14px] h-[56px] flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-[0_4px_20px_rgba(68,131,158,0.35)] active:scale-[0.985] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <span class="df-cta-text">Donate &pound;{defaultAmount}</span>
+          <svg class="df-cta-arrow w-4 h-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg>
+          <svg class="df-cta-spinner hidden animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
+        </button>
+
+        <!-- ═══ Error Display ═══ -->
+        <div class="df-error hidden mt-3 bg-red-50 border border-red-200 text-red-700 text-[13px] sm:text-[14px] rounded-xl px-4 py-3 text-center"></div>
+
+        <!-- ═══ Trust Signals ═══ -->
+        <div class="flex items-center justify-center gap-4 mt-5 text-navy/30">
+          <div class="flex items-center gap-1.5 text-[12px] sm:text-[13px]">
+            <svg class="w-[14px] h-[14px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
+            <span>Encrypted</span>
+          </div>
+          <div class="w-px h-3 bg-navy/10"></div>
+          <div class="flex items-center gap-1.5 text-[12px] sm:text-[13px]">
+            <svg class="w-[14px] h-[14px]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5L2 4v4c0 3.5 2.5 5.7 6 7 3.5-1.3 6-3.5 6-7V4L8 1.5z"/></svg>
+            <span>Secure</span>
+          </div>
+          <div class="w-px h-3 bg-navy/10"></div>
+          <div class="flex items-center gap-1.5 text-[12px] sm:text-[13px]">
+            <svg class="w-[14px] h-[14px] text-navy/30" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+            <span>Powered by Stripe</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .df-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-navy);
+    opacity: 0.45;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .df-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    background: rgba(15, 36, 62, 0.04);
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-navy);
+    outline: none;
+    transition: box-shadow 0.2s;
+  }
+  .df-input:focus {
+    box-shadow: 0 0 0 2px rgba(68, 131, 158, 0.35);
+  }
+  .df-input::placeholder {
+    color: rgba(15, 36, 62, 0.3);
+    font-weight: 400;
+  }
+
+  /* Gift Aid checkbox visual */
+  .df-giftaid-check:checked ~ div {
+    background-color: var(--color-green);
+    border-color: var(--color-green);
+  }
+  .df-giftaid-check:checked ~ div svg {
+    opacity: 1;
+  }
+
+  /* Gift Aid fields reveal animation */
+  .df-giftaid-fields {
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+    max-height: 0;
+    opacity: 0;
+  }
+  .df-giftaid-fields.is-open {
+    max-height: 500px;
+    opacity: 1;
+  }
+</style>
+
+<script>
+  function initDonationForms() {
+    document.querySelectorAll<HTMLElement>('.donation-form').forEach(form => {
+      let selectedAmount = Number(form.dataset.defaultAmount) || 30;
+      let selectedFrequency = form.dataset.defaultFrequency || 'one-off';
+      let selectedFundId = form.dataset.defaultFundId || '';
+      let selectedFundName = form.dataset.defaultFundName || '';
+      let isCustom = false;
+      let isLoading = false;
+      let giftAid = false;
+
+      const amountBtns = form.querySelectorAll<HTMLButtonElement>('.df-amount');
+      const freqBtns = form.querySelectorAll<HTMLButtonElement>('.df-freq');
+      const fundBtns = form.querySelectorAll<HTMLButtonElement>('.df-fund-btn');
+      const ctaBtn = form.querySelector<HTMLButtonElement>('.df-cta-btn');
+      const ctaText = form.querySelector<HTMLElement>('.df-cta-text');
+      const ctaArrow = form.querySelector<HTMLElement>('.df-cta-arrow');
+      const ctaSpinner = form.querySelector<HTMLElement>('.df-cta-spinner');
+      const customInput = form.querySelector<HTMLInputElement>('.df-custom-input');
+      const customRow = form.querySelector<HTMLElement>('.df-custom-row');
+      const errorEl = form.querySelector<HTMLElement>('.df-error');
+      const giftAidCheck = form.querySelector<HTMLInputElement>('.df-giftaid-check');
+      const giftAidFields = form.querySelector<HTMLElement>('.df-giftaid-fields');
+      const giftAidAmount = form.querySelector<HTMLElement>('.df-giftaid-amount');
+      const giftAidTotal = form.querySelector<HTMLElement>('.df-giftaid-total');
+      const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
+
+      // ── Helpers ──
+
+      function getFreqLabel(): string {
+        const btn = form.querySelector<HTMLButtonElement>(`.df-freq[data-freq="${selectedFrequency}"]`);
+        return btn?.dataset.freqLabel || '';
+      }
+
+      function updateCTA() {
+        if (!ctaText || isLoading) return;
+        const freqText = selectedFrequency === 'one-off' ? '' : ` ${getFreqLabel()}`;
+        ctaText.innerHTML = `Donate &pound;${selectedAmount}${freqText}`;
+      }
+
+      function updateGiftAidDisplay() {
+        if (giftAidAmount) giftAidAmount.innerHTML = `&pound;${selectedAmount}`;
+        if (giftAidTotal) {
+          const total = Math.round(selectedAmount * 1.25 * 100) / 100;
+          giftAidTotal.innerHTML = `&pound;${total}`;
+        }
+      }
+
+      function showError(msg: string) {
+        if (!errorEl) return;
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setTimeout(() => errorEl.classList.add('hidden'), 6000);
+      }
+
+      function clearError() {
+        errorEl?.classList.add('hidden');
+      }
+
+      function setLoading(loading: boolean) {
+        isLoading = loading;
+        if (!ctaBtn) return;
+        if (loading) {
+          if (ctaText) ctaText.textContent = 'Processing...';
+          ctaArrow?.classList.add('hidden');
+          ctaSpinner?.classList.remove('hidden');
+          ctaBtn.disabled = true;
+        } else {
+          updateCTA();
+          ctaArrow?.classList.remove('hidden');
+          ctaSpinner?.classList.add('hidden');
+          ctaBtn.disabled = false;
+        }
+      }
+
+      // ── Active state helpers ──
+
+      function activateBtn(
+        btn: HTMLButtonElement,
+        all: NodeListOf<HTMLButtonElement>,
+        activeClasses: string[],
+        inactiveClasses: string[],
+      ) {
+        all.forEach(b => {
+          if (b === btn) {
+            inactiveClasses.forEach(c => b.classList.remove(c));
+            activeClasses.forEach(c => b.classList.add(c));
+          } else {
+            activeClasses.forEach(c => b.classList.remove(c));
+            inactiveClasses.forEach(c => b.classList.add(c));
+          }
+        });
+      }
+
+      // ── Fund selection ──
+      fundBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedFundId = btn.dataset.fundId || '';
+          selectedFundName = btn.dataset.fundName || '';
+          activateBtn(btn, fundBtns,
+            ['bg-navy', 'text-white', 'shadow-sm'],
+            ['bg-navy/[0.04]', 'text-navy'],
+          );
+        });
+      });
+
+      // ── Amount selection ──
+      amountBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.dataset.amount;
+          if (val === 'custom') {
+            isCustom = true;
+            if (customRow) customRow.style.display = '';
+            setTimeout(() => customInput?.focus(), 50);
+          } else {
+            isCustom = false;
+            selectedAmount = Number(val);
+            if (customRow) customRow.style.display = 'none';
+          }
+          activateBtn(btn, amountBtns,
+            ['bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]'],
+            ['bg-navy/[0.04]', 'text-navy'],
+          );
+          updateCTA();
+          updateGiftAidDisplay();
+        });
+      });
+
+      customInput?.addEventListener('input', () => {
+        const val = Number(customInput.value);
+        if (val > 0) {
+          selectedAmount = val;
+          updateCTA();
+          updateGiftAidDisplay();
+        }
+      });
+
+      // ── Frequency selection ──
+      freqBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedFrequency = btn.dataset.freq || 'one-off';
+          activateBtn(btn, freqBtns,
+            ['bg-navy', 'text-white'],
+            ['bg-navy/[0.04]', 'text-navy'],
+          );
+          updateCTA();
+        });
+      });
+
+      // ── Gift Aid toggle ──
+      giftAidCheck?.addEventListener('change', () => {
+        giftAid = giftAidCheck.checked;
+        if (giftAidFields) {
+          if (giftAid) {
+            giftAidFields.style.display = '';
+            // Trigger reflow before adding class for animation
+            void giftAidFields.offsetHeight;
+            giftAidFields.classList.add('is-open');
+          } else {
+            giftAidFields.classList.remove('is-open');
+            // Wait for transition to finish before hiding
+            setTimeout(() => {
+              if (!giftAidCheck.checked) giftAidFields.style.display = 'none';
+            }, 350);
+          }
+        }
+      });
+
+      // ── Validation ──
+      function validate(): string | null {
+        if (isCustom) {
+          if (!customInput?.value || Number(customInput.value) < 1) {
+            return 'Please enter a valid donation amount.';
+          }
+          selectedAmount = Number(customInput.value);
+        }
+        if (!selectedAmount || selectedAmount < 1) {
+          return 'Please select a donation amount.';
+        }
+
+        const email = emailInput?.value?.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return 'Please enter a valid email address.';
+        }
+
+        if (giftAid) {
+          const firstName = form.querySelector<HTMLInputElement>('input[name="firstName"]')?.value?.trim();
+          const lastName = form.querySelector<HTMLInputElement>('input[name="lastName"]')?.value?.trim();
+          const address1 = form.querySelector<HTMLInputElement>('input[name="address1"]')?.value?.trim();
+          const city = form.querySelector<HTMLInputElement>('input[name="city"]')?.value?.trim();
+          const postcode = form.querySelector<HTMLInputElement>('input[name="postcode"]')?.value?.trim();
+
+          if (!firstName || !lastName) return 'Please enter your full name for Gift Aid.';
+          if (!address1) return 'Please enter your address for Gift Aid.';
+          if (!city) return 'Please enter your city for Gift Aid.';
+          if (!postcode) return 'Please enter your postcode for Gift Aid.';
+        }
+
+        return null;
+      }
+
+      // ── Stripe.js setup ──
+      let stripe: any = null;
+      let cardElement: any = null;
+      const cardContainer = form.querySelector('#card-element');
+      const cardErrors = form.querySelector('#card-errors');
+
+      async function initStripe() {
+        try {
+          const res = await fetch('/api/stripe-publishable-key');
+          const data = await res.json();
+          if (!data.publishableKey) return;
+
+          // Load Stripe.js if not already loaded
+          if (!(window as any).Stripe) {
+            await new Promise<void>((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = 'https://js.stripe.com/v3/';
+              script.onload = () => resolve();
+              script.onerror = () => reject(new Error('Failed to load Stripe.js'));
+              document.head.appendChild(script);
+            });
+          }
+
+          stripe = (window as any).Stripe(data.publishableKey);
+          const elements = stripe.elements();
+          cardElement = elements.create('card', {
+            hidePostalCode: true,
+            style: {
+              base: {
+                fontFamily: 'Satoshi, system-ui, sans-serif',
+                fontSize: '16px',
+                fontWeight: '500',
+                color: '#0f243e',
+                '::placeholder': { color: 'rgba(15, 36, 62, 0.3)' },
+              },
+              invalid: { color: '#e53e3e' },
+            },
+          });
+          cardElement.mount(cardContainer);
+          cardElement.on('change', (event: any) => {
+            if (cardErrors) {
+              if (event.error) {
+                cardErrors.textContent = event.error.message;
+                cardErrors.classList.remove('hidden');
+              } else {
+                cardErrors.textContent = '';
+                cardErrors.classList.add('hidden');
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Failed to init Stripe:', err);
+        }
+      }
+
+      initStripe();
+
+      // ── Submit ──
+      ctaBtn?.addEventListener('click', async () => {
+        if (isLoading) return;
+        clearError();
+
+        const validationError = validate();
+        if (validationError) {
+          showError(validationError);
+          return;
+        }
+
+        if (!stripe || !cardElement) {
+          showError('Payment system is still loading. Please try again in a moment.');
+          return;
+        }
+
+        setLoading(true);
+
+        const donorData: Record<string, unknown> = {
+          amount: selectedAmount,
+          frequency: selectedFrequency,
+          fund: selectedFundId || undefined,
+          fundName: selectedFundName || undefined,
+          donorEmail: emailInput?.value?.trim(),
+          giftAid,
+        };
+
+        if (giftAid) {
+          donorData.donorName = [
+            form.querySelector<HTMLInputElement>('input[name="firstName"]')?.value?.trim(),
+            form.querySelector<HTMLInputElement>('input[name="lastName"]')?.value?.trim(),
+          ].filter(Boolean).join(' ');
+          donorData.address = {
+            line1: form.querySelector<HTMLInputElement>('input[name="address1"]')?.value?.trim(),
+            line2: form.querySelector<HTMLInputElement>('input[name="address2"]')?.value?.trim(),
+            city: form.querySelector<HTMLInputElement>('input[name="city"]')?.value?.trim(),
+            postcode: form.querySelector<HTMLInputElement>('input[name="postcode"]')?.value?.trim(),
+          };
+        }
+
+        try {
+          // Step 1: Create PaymentIntent or Subscription on our server
+          const res = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(donorData),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || !data.clientSecret) {
+            throw new Error(data.error || 'Failed to create payment');
+          }
+
+          // Step 2: Confirm payment with Stripe.js
+          const { error, paymentIntent: confirmedPI } = await stripe.confirmCardPayment(data.clientSecret, {
+            payment_method: {
+              card: cardElement,
+              billing_details: {
+                email: emailInput?.value?.trim(),
+                ...(donorData.donorName && { name: donorData.donorName as string }),
+                ...(donorData.address && {
+                  address: {
+                    line1: (donorData.address as any).line1 || undefined,
+                    line2: (donorData.address as any).line2 || undefined,
+                    city: (donorData.address as any).city || undefined,
+                    postal_code: (donorData.address as any).postcode || undefined,
+                    country: 'GB',
+                  },
+                }),
+              },
+            },
+          });
+
+          if (error) {
+            throw new Error(error.message || 'Payment failed');
+          }
+
+          // Step 3: Record the donation in our database
+          await fetch('/api/confirm-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paymentIntentId: confirmedPI?.id,
+              donorEmail: emailInput?.value?.trim(),
+              donorName: donorData.donorName || undefined,
+              fund: selectedFundId || undefined,
+              fundName: selectedFundName || undefined,
+              frequency: selectedFrequency,
+              giftAid,
+            }),
+          }).catch(() => {}); // Non-blocking — webhook is the fallback
+
+          // Success — redirect to thank you page
+          window.location.href = '/donate/success';
+        } catch (err) {
+          setLoading(false);
+          showError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+        }
+      });
+    });
+  }
+
+  initDonationForms();
+</script>

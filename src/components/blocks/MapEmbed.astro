@@ -1,0 +1,29 @@
+---
+interface Props {
+  block: {
+    googleMapsEmbedUrl?: string | null;
+    height?: '300' | '450' | '600' | null;
+  };
+}
+
+const { block } = Astro.props;
+const height = block.height ?? '450';
+const heightPx = `${height}px`;
+---
+
+{block.googleMapsEmbedUrl && (
+  <section class="px-5 md:px-10 py-6 lg:py-8">
+    <div class="max-w-[1440px] mx-auto rounded-xl lg:rounded-2xl overflow-hidden">
+      <iframe
+        src={block.googleMapsEmbedUrl}
+        width="100%"
+        height={heightPx}
+        style="border:0;"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Map"
+      ></iframe>
+    </div>
+  </section>
+)}

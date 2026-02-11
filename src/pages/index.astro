@@ -7,13 +7,18 @@ import PrayerTimesPanel from '../components/PrayerTimesPanel.astro';
 import QuickLinks from '../components/QuickLinks.astro';
 
 import { getHomePage, getLatestNews, getDonateSettings } from '../lib/payload';
-import type { HeroSliderBlock, IconCardGridBlock, DonateSettings, News } from '../lib/payload';
+import type { Page, HeroSliderBlock, IconCardGridBlock, DonateSettings, News } from '../lib/payload';
 import { getTodayPrayerTimes } from '../lib/prayer-times';
 import type { PrayerTimesData } from '../lib/prayer-times';
+import { getPreviewData } from '../lib/preview-store';
+
+const isPreview = Astro.url.searchParams.has('preview');
 
 // Fetch all data in parallel
 const [homePage, newsArticles, donateSettings, prayerData] = await Promise.all([
-  getHomePage().catch(() => null),
+  isPreview
+    ? (getPreviewData('home') as Page | null ?? getHomePage().catch(() => null))
+    : getHomePage().catch(() => null),
   getLatestNews(3).catch(() => [] as News[]),
   getDonateSettings().catch(() => null as DonateSettings | null),
   getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),

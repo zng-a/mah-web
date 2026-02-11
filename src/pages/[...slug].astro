@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import BlockRenderer from '../components/BlockRenderer.astro';
+import DonateBar from '../components/DonateBar.astro';
+import { getPageBySlug, getDonateSettings } from '../lib/payload';
+import type { Page, DonateSettings } from '../lib/payload';
+import { getTodayPrayerTimes } from '../lib/prayer-times';
+import type { PrayerTimesData } from '../lib/prayer-times';
+import { getPreviewData } from '../lib/preview-store';
+
+const { slug } = Astro.params;
+const pageSlug = slug || 'home';
+
+// Don't handle the home page here — index.astro handles it
+if (pageSlug === 'home') {
+  return Astro.redirect('/');
+}
+
+const isPreview = Astro.url.searchParams.has('preview');
+const page = (isPreview ? getPreviewData(pageSlug) as Page | null : null)
+  ?? await getPageBySlug(pageSlug).catch(() => null);
+
+if (!page) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+// Fetch supplementary data in parallel
+const [donateSettings, prayerData] = await Promise.all([
+  page.showDonateBar ? getDonateSettings().catch(() => null as DonateSettings | null) : null,
+  getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
+]);
+
+const layout = page.layout ?? [];
+
+const showDonate = page.showDonateBar && donateSettings;
+const donatePosition = page.donateBarPosition ?? 'below-hero';
+
+// Find where the first hero ends (for donate bar "below-hero" positioning)
+const heroIdx = layout.findIndex((b) => b.blockType === 'hero-slider' || b.blockType === 'hero-simple');
+const afterHeroIdx = heroIdx >= 0 ? heroIdx + 1 : 0;
+
+const donate: DonateSettings = donateSettings ?? {
+  amounts: [{ value: 5 }, { value: 10 }, { value: 20 }, { value: 50 }, { value: 100 }],
+  defaultAmount: 10,
+  frequencies: [
+    { label: 'One Time', value: 'once' },
+    { label: 'Monthly', value: 'monthly' },
+  ],
+  defaultFrequency: 'once',
+  heading: 'Donate',
+  ctaText: 'Donate Now',
+};
+---
+
+<Base title={page.title} prayerData={prayerData}>
+  {showDonate && donatePosition === 'below-hero' ? (
+    <>
+      <!-- Blocks before and including the hero -->
+      <BlockRenderer blocks={layout.slice(0, afterHeroIdx)} />
+      <!-- Donate bar after hero -->
+      <div class="max-w-[1440px] mx-auto">
+        <DonateBar donate={donate} />
+      </div>
+      <!-- Remaining blocks -->
+      <BlockRenderer blocks={layout.slice(afterHeroIdx)} />
+    </>
+  ) : (
+    <>
+      <BlockRenderer blocks={layout} />
+      {showDonate && donatePosition === 'above-footer' && (
+        <div class="max-w-[1440px] mx-auto">
+          <DonateBar donate={donate} />
+        </div>
+      )}
+    </>
+  )}
+</Base>

@@ -10,18 +10,27 @@ const { donate } = Astro.props;
 const amounts = donate.amounts?.map(a => a.value) ?? [5, 10, 20, 50, 100];
 const defaultAmount = donate.defaultAmount ?? 10;
 const frequencies = donate.frequencies ?? [
-  { label: 'One Time', value: 'once' },
+  { label: 'One Time', value: 'one-off' },
   { label: 'Monthly', value: 'monthly' },
 ];
-const defaultFrequency = donate.defaultFrequency ?? 'once';
+const defaultFrequency = donate.defaultFrequency ?? 'one-off';
 const heading = donate.heading ?? 'Donate';
 const description = donate.description ?? 'Your contribution will help us to maintain and develop the wide range of services we offer. Prophet Muhammad \uFDFA said: "Allah said: \'Spend, O son of Adam, and I shall spend on you.\'"';
 const ctaText = donate.ctaText ?? 'Donate Now';
-const ctaUrl = donate.ctaUrl ?? '#';
+
+// Resolve fund info for the default fund
+const defaultFund = donate.defaultFund && typeof donate.defaultFund === 'object' ? donate.defaultFund : null;
 ---
 
 <section class="px-5 md:px-10 -mt-[60px] lg:-mt-[100px] relative z-10">
-  <div class="bg-navy rounded-[24px] md:rounded-[32px] lg:rounded-[40px] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-9" id="donate-bar">
+  <div
+    class="bg-navy rounded-[24px] md:rounded-[32px] lg:rounded-[40px] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-9"
+    id="donate-bar"
+    data-default-amount={defaultAmount}
+    data-default-frequency={defaultFrequency}
+    data-default-fund-id={defaultFund?.id ?? ''}
+    data-default-fund-name={defaultFund?.name ?? ''}
+  >
     <!-- Mobile/Tablet: Stacked layout -->
     <div class="xl:hidden">
       <!-- Heading -->
@@ -43,6 +52,20 @@ const ctaUrl = donate.ctaUrl ?? '#';
         <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[15px] sm:text-[17px] rounded-xl h-[44px] sm:h-[48px] hover:bg-teal hover:text-white transition-colors">Custom</button>
       </div>
 
+      <!-- Custom amount input (hidden by default) -->
+      <div id="custom-amount-row-mobile" class="hidden mb-4">
+        <div class="flex items-center gap-2 max-w-[240px] mx-auto">
+          <span class="text-white text-[20px] font-bold">&pound;</span>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Enter amount"
+            class="custom-amount-input w-full bg-white text-navy font-bold text-[17px] rounded-xl h-[48px] px-4 outline-none focus:ring-2 focus:ring-teal"
+          />
+        </div>
+      </div>
+
       <!-- Frequency + CTA row -->
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center">
         <div class="flex gap-2 shrink-0" id="freq-grid-mobile">
@@ -55,10 +78,10 @@ const ctaUrl = donate.ctaUrl ?? '#';
             </button>
           ))}
         </div>
-        <a href={ctaUrl} class="donate-cta bg-teal text-white font-bold text-[15px] sm:text-[16px] rounded-xl h-[48px] sm:h-[52px] px-8 sm:px-10 flex items-center justify-center gap-2 hover:bg-teal/80 transition-colors w-full sm:w-auto">
-          {ctaText}
+        <button type="button" class="donate-cta-btn bg-teal text-white font-bold text-[15px] sm:text-[16px] rounded-xl h-[48px] sm:h-[52px] px-8 sm:px-10 flex items-center justify-center gap-2 hover:bg-teal/80 transition-colors w-full sm:w-auto">
+          <span class="donate-cta-text">{ctaText}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-        </a>
+        </button>
       </div>
     </div>
 
@@ -75,7 +98,7 @@ const ctaUrl = donate.ctaUrl ?? '#';
       <!-- Separator -->
       <div class="w-px self-stretch bg-white/15 mx-8"></div>
 
-      <!-- Amount grid — interleaved: odd indices on top row, even on bottom (matches original £5/£20/£100 then £10/£50/Custom) -->
+      <!-- Amount grid -->
       <div class="grid grid-cols-3 gap-2.5 shrink-0" id="amount-grid-desktop">
         {amounts.filter((_, i) => i % 2 === 0).map((amount) => (
           <button
@@ -94,6 +117,20 @@ const ctaUrl = donate.ctaUrl ?? '#';
           </button>
         ))}
         <button data-amount="custom" class="donate-amount bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] w-[95px] hover:bg-teal hover:text-white transition-colors">Custom</button>
+      </div>
+
+      <!-- Custom amount input (desktop, hidden by default) -->
+      <div id="custom-amount-row-desktop" class="hidden ml-2.5 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-white text-[22px] font-bold">&pound;</span>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Amount"
+            class="custom-amount-input w-[100px] bg-white text-navy font-bold text-[18px] rounded-2xl h-[50px] px-4 outline-none focus:ring-2 focus:ring-teal"
+          />
+        </div>
       </div>
 
       <!-- Separator -->
@@ -115,22 +152,61 @@ const ctaUrl = donate.ctaUrl ?? '#';
       <div class="w-px self-stretch bg-white/15 mx-8"></div>
 
       <!-- CTA -->
-      <a href={ctaUrl} class="donate-cta bg-teal text-white font-bold text-[18px] rounded-2xl h-[54px] px-8 flex items-center justify-center gap-2.5 hover:bg-teal/80 transition-colors">
-        {ctaText}
+      <button type="button" class="donate-cta-btn bg-teal text-white font-bold text-[18px] rounded-2xl h-[54px] px-8 flex items-center justify-center gap-2.5 hover:bg-teal/80 transition-colors">
+        <span class="donate-cta-text">{ctaText}</span>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
-      </a>
+      </button>
     </div>
+
+    <!-- Error message -->
+    <p id="donate-error" class="hidden text-red-400 text-[14px] text-center mt-3"></p>
   </div>
 </section>
 
 <script>
   function initDonateBar() {
-    const amountBtns = document.querySelectorAll('.donate-amount');
-    const freqBtns = document.querySelectorAll('.donate-freq');
+    const bar = document.getElementById('donate-bar');
+    if (!bar) return;
+
+    let selectedAmount: number = Number(bar.dataset.defaultAmount) || 10;
+    let selectedFrequency: string = bar.dataset.defaultFrequency || 'one-off';
+    const defaultFundId = bar.dataset.defaultFundId || '';
+    const defaultFundName = bar.dataset.defaultFundName || '';
+    let isCustom = false;
+    const amountBtns = document.querySelectorAll<HTMLButtonElement>('.donate-amount');
+    const freqBtns = document.querySelectorAll<HTMLButtonElement>('.donate-freq');
+    const ctaBtns = document.querySelectorAll<HTMLButtonElement>('.donate-cta-btn');
+    const customInputs = document.querySelectorAll<HTMLInputElement>('.custom-amount-input');
+    const customRowMobile = document.getElementById('custom-amount-row-mobile');
+    const customRowDesktop = document.getElementById('custom-amount-row-desktop');
+    const errorEl = document.getElementById('donate-error');
+
+    function showError(msg: string) {
+      if (errorEl) {
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
+        setTimeout(() => errorEl.classList.add('hidden'), 5000);
+      }
+    }
 
     amountBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const amount = btn.getAttribute('data-amount');
+        if (amount === 'custom') {
+          isCustom = true;
+          customRowMobile?.classList.remove('hidden');
+          customRowDesktop?.classList.remove('hidden');
+          // Focus the visible input
+          customInputs.forEach(input => {
+            if (input.offsetParent !== null) input.focus();
+          });
+        } else {
+          isCustom = false;
+          selectedAmount = Number(amount);
+          customRowMobile?.classList.add('hidden');
+          customRowDesktop?.classList.add('hidden');
+        }
+
         amountBtns.forEach(b => {
           if (b.getAttribute('data-amount') === amount) {
             b.classList.remove('bg-white', 'text-navy');
@@ -143,9 +219,21 @@ const ctaUrl = donate.ctaUrl ?? '#';
       });
     });
 
+    customInputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const val = Number(input.value);
+        if (val > 0) selectedAmount = val;
+        // Sync other custom inputs
+        customInputs.forEach(other => {
+          if (other !== input) other.value = input.value;
+        });
+      });
+    });
+
     freqBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const freq = btn.getAttribute('data-freq');
+        if (freq) selectedFrequency = freq;
         freqBtns.forEach(b => {
           if (b.getAttribute('data-freq') === freq) {
             b.classList.remove('bg-white', 'text-navy');
@@ -157,6 +245,37 @@ const ctaUrl = donate.ctaUrl ?? '#';
         });
       });
     });
+
+    function handleDonate() {
+      if (isCustom) {
+        const customVal = customInputs[0]?.value;
+        if (!customVal || Number(customVal) < 1) {
+          showError('Please enter a valid donation amount.');
+          return;
+        }
+        selectedAmount = Number(customVal);
+      }
+
+      if (!selectedAmount || selectedAmount < 1) {
+        showError('Please select a donation amount.');
+        return;
+      }
+
+      errorEl?.classList.add('hidden');
+
+      // Navigate to the donation page with pre-selected values
+      const params = new URLSearchParams();
+      params.set('amount', String(selectedAmount));
+      params.set('frequency', selectedFrequency);
+      if (defaultFundId) params.set('fund', defaultFundId);
+
+      window.location.href = `/donate?${params.toString()}`;
+    }
+
+    ctaBtns.forEach(btn => {
+      btn.addEventListener('click', handleDonate);
+    });
   }
+
   initDonateBar();
 </script>

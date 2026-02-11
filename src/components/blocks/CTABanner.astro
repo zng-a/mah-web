@@ -1,0 +1,35 @@
+---
+interface Props {
+  block: {
+    heading: string;
+    description?: string | null;
+    ctaLabel: string;
+    ctaUrl?: string | null;
+    ctaPage?: unknown;
+    style?: 'navy' | 'teal' | 'teal-tint' | null;
+  };
+}
+
+const { block } = Astro.props;
+const href = block.ctaUrl || (block.ctaPage && typeof block.ctaPage === 'object' && 'slug' in block.ctaPage ? `/${(block.ctaPage as any).slug}` : '#');
+
+const styleMap: Record<string, { bg: string; text: string; btn: string }> = {
+  navy: { bg: 'bg-navy', text: 'text-white', btn: 'bg-teal text-white hover:bg-teal/80' },
+  teal: { bg: 'bg-teal', text: 'text-white', btn: 'bg-white text-navy hover:bg-white/90' },
+  'teal-tint': { bg: 'bg-teal-tint', text: 'text-navy', btn: 'bg-teal text-white hover:bg-teal/80' },
+};
+const s = styleMap[block.style ?? 'teal'] ?? styleMap.teal;
+---
+
+<section class={`${s.bg} py-12 lg:py-16`}>
+  <div class="max-w-[1440px] mx-auto px-5 md:px-10 text-center">
+    <h2 class={`text-[28px] lg:text-[36px] font-bold ${s.text}`}>{block.heading}</h2>
+    {block.description && (
+      <p class={`${s.text} opacity-80 text-[16px] lg:text-[18px] mt-3 max-w-[600px] mx-auto`}>{block.description}</p>
+    )}
+    <a href={href} class={`inline-flex items-center font-bold text-[16px] lg:text-[18px] px-8 py-3.5 rounded-xl mt-6 transition-colors ${s.btn}`}>
+      {block.ctaLabel}
+      <svg class="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+    </a>
+  </div>
+</section>

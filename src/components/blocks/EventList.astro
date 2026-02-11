@@ -1,0 +1,44 @@
+---
+import { getEvents } from '../../lib/payload';
+
+interface Props {
+  block: {
+    filter?: 'upcoming' | 'all' | null;
+    limit?: number | null;
+    showPastEvents?: boolean | null;
+  };
+}
+
+const { block } = Astro.props;
+const events = await getEvents(block.filter ?? 'upcoming', block.limit ?? 10).catch(() => []);
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+---
+
+<section class="px-5 md:px-10 py-8 lg:py-12">
+  <div class="max-w-[1440px] mx-auto">
+    {events.length === 0 ? (
+      <p class="text-muted text-center py-12">No upcoming events at this time.</p>
+    ) : (
+      <div class="space-y-3">
+        {events.map((event) => (
+          <div class="bg-teal-tint rounded-xl lg:rounded-2xl px-6 lg:px-8 py-5 lg:py-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+            <div class="shrink-0 sm:w-[180px]">
+              <div class="text-teal font-bold text-[15px] lg:text-[17px]">{formatDate(event.eventDate)}</div>
+              <div class="text-muted text-[14px] lg:text-[15px]">{event.startTime}{event.endTime ? ` – ${event.endTime}` : ''}</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-[18px] lg:text-[22px] font-bold text-navy">{event.title}</h3>
+              {event.location && (
+                <p class="text-muted text-[14px] lg:text-[15px] mt-0.5">{event.location}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

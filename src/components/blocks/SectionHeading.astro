@@ -1,0 +1,19 @@
+---
+interface Props {
+  block: {
+    heading: string;
+    subtitle?: string | null;
+    alignment?: 'left' | 'center' | null;
+  };
+}
+
+const { block } = Astro.props;
+const align = block.alignment === 'center' ? 'text-center' : 'text-left';
+---
+
+<section class={`px-5 md:px-10 pt-10 lg:pt-14 pb-4 lg:pb-6 max-w-[1440px] mx-auto ${align}`}>
+  <h2 class="text-[26px] lg:text-[34px] font-bold text-navy">{block.heading}</h2>
+  {block.subtitle && (
+    <p class="text-muted text-[16px] lg:text-[18px] mt-2">{block.subtitle}</p>
+  )}
+</section>

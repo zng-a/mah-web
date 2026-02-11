@@ -1,0 +1,29 @@
+---
+import { lexicalToHtml } from '../../lib/lexical';
+
+interface Props {
+  block: {
+    items?: { question: string; answer?: unknown; id?: string | null }[] | null;
+  };
+}
+
+const { block } = Astro.props;
+const items = block.items ?? [];
+---
+
+<section class="px-5 md:px-10 py-8 lg:py-12">
+  <div class="max-w-[860px] mx-auto space-y-3">
+    {items.map((item, i) => {
+      const answerHtml = lexicalToHtml(item.answer);
+      return (
+        <details class="group bg-teal-tint rounded-xl lg:rounded-2xl overflow-hidden">
+          <summary class="flex items-center justify-between cursor-pointer px-6 lg:px-8 py-5 lg:py-6 text-[17px] lg:text-[20px] font-bold text-navy list-none">
+            {item.question}
+            <svg class="w-5 h-5 shrink-0 text-teal transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="px-6 lg:px-8 pb-5 lg:pb-6 text-[15px] lg:text-[16px] text-navy/80 leading-relaxed prose" set:html={answerHtml} />
+        </details>
+      );
+    })}
+  </div>
+</section>

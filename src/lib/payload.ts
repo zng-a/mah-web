@@ -21,24 +21,20 @@ export interface Media {
 }
 
 export interface Header {
-  announcementBar?: {
-    enabled?: boolean | null;
-    message?: string | null;
-    linkText?: string | null;
-    linkUrl?: string | null;
-  };
   logo?: (string | null) | Media;
   navLinks?:
     | {
         label: string;
-        url?: string | null;
+        linkType?: 'page' | 'custom';
         page?: (string | null) | { slug: string };
+        url?: string | null;
         openInNewTab?: boolean | null;
         children?:
           | {
               label: string;
-              url?: string | null;
+              linkType?: 'page' | 'custom';
               page?: (string | null) | { slug: string };
+              url?: string | null;
               id?: string | null;
             }[]
           | null;
@@ -89,6 +85,15 @@ export interface SiteSettings {
     | null;
 }
 
+export interface DonationFund {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  active?: boolean | null;
+  order?: number | null;
+}
+
 export interface DonateSettings {
   amounts?: { value: number; id?: string | null }[] | null;
   defaultAmount?: number | null;
@@ -98,6 +103,9 @@ export interface DonateSettings {
   description?: string | null;
   ctaText?: string | null;
   ctaUrl?: string | null;
+  funds?: (string | DonationFund)[] | null;
+  defaultFund?: (string | DonationFund) | null;
+  successMessage?: string | null;
 }
 
 export interface HeroSlide {
@@ -200,9 +208,64 @@ export async function getDonateSettings(): Promise<DonateSettings> {
   return getGlobal<DonateSettings>('donate-settings');
 }
 
-export async function getHomePage(): Promise<Page | null> {
-  const result = await getCollection<Page>('pages', 'where[slug][equals]=home&depth=2');
+export async function getPageBySlug(slug: string): Promise<Page | null> {
+  const result = await getCollection<Page>('pages', `where[slug][equals]=${slug}&where[status][equals]=published&depth=2`);
   return result.docs[0] ?? null;
+}
+
+export async function getHomePage(): Promise<Page | null> {
+  return getPageBySlug('home');
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description?: unknown;
+  eventDate: string;
+  startTime: string;
+  endTime?: string | null;
+  location?: string | null;
+  featuredImage?: string | Media | null;
+  status?: string | null;
+}
+
+export interface Service {
+  id: string;
+  title: string;
+  slug: string;
+  icon?: string | Media | null;
+  shortDescription?: string | null;
+  featuredImage?: string | Media | null;
+  order?: number | null;
+}
+
+export interface TeamMember {
+  id: string;
+  name?: string | null;
+  title?: string | null;
+  role?: string | null;
+  photo?: string | Media | null;
+  bio?: string | null;
+  order?: number | null;
+}
+
+export async function getEvents(filter: 'upcoming' | 'all' = 'upcoming', limit = 10): Promise<Event[]> {
+  const today = new Date().toISOString().split('T')[0];
+  const whereFilter = filter === 'upcoming'
+    ? `where[status][equals]=upcoming&where[eventDate][greater_than_equal]=${today}`
+    : '';
+  const result = await getCollection<Event>('events', `${whereFilter}&sort=eventDate&limit=${limit}&depth=1`);
+  return result.docs;
+}
+
+export async function getServices(limit = 20): Promise<Service[]> {
+  const result = await getCollection<Service>('services', `sort=order&limit=${limit}&depth=1`);
+  return result.docs;
+}
+
+export async function getTeamMembers(limit = 20): Promise<TeamMember[]> {
+  const result = await getCollection<TeamMember>('team-members', `sort=order&limit=${limit}&depth=1`);
+  return result.docs;
 }
 
 export async function getLatestNews(limit = 3): Promise<News[]> {
@@ -217,6 +280,14 @@ export async function getBannerAnnouncements(): Promise<Announcement[]> {
   const result = await getCollection<Announcement>(
     'announcements',
     'where[status][equals]=published&sort=-publishedAt&limit=5',
+  );
+  return result.docs;
+}
+
+export async function getDonationFunds(): Promise<DonationFund[]> {
+  const result = await getCollection<DonationFund>(
+    'donation-funds',
+    'where[active][equals]=true&sort=order&depth=0',
   );
   return result.docs;
 }

@@ -1,0 +1,20 @@
+---
+import { lexicalToHtml } from '../../lib/lexical';
+
+interface Props {
+  block: {
+    content?: unknown;
+    width?: 'normal' | 'wide' | 'full' | null;
+  };
+}
+
+const { block } = Astro.props;
+const html = lexicalToHtml(block.content);
+const widthClass = block.width === 'wide' ? 'max-w-[960px]' : block.width === 'full' ? 'max-w-none' : 'max-w-[720px]';
+---
+
+{html && (
+  <section class="px-5 md:px-10 py-8 lg:py-12">
+    <div class={`${widthClass} mx-auto prose prose-lg prose-navy max-w-none`} set:html={html} />
+  </section>
+)}

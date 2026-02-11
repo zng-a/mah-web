@@ -1,0 +1,63 @@
+---
+import HeroSlider from './HeroSlider.astro';
+import HeroSimple from './blocks/HeroSimple.astro';
+import RichTextBlock from './blocks/RichTextBlock.astro';
+import SectionHeading from './blocks/SectionHeading.astro';
+import CardGrid from './blocks/CardGrid.astro';
+import QuickLinks from './QuickLinks.astro';
+import NewsFeature from './blocks/NewsFeature.astro';
+import TeamGrid from './blocks/TeamGrid.astro';
+import ContactSplit from './blocks/ContactSplit.astro';
+import MapEmbed from './blocks/MapEmbed.astro';
+import FormBlock from './blocks/FormBlock.astro';
+import CTABanner from './blocks/CTABanner.astro';
+import EventList from './blocks/EventList.astro';
+import FaqAccordion from './blocks/FaqAccordion.astro';
+import Spacer from './blocks/Spacer.astro';
+import DonationForm from './blocks/DonationForm.astro';
+
+interface Props {
+  blocks: { blockType: string; [k: string]: unknown }[];
+}
+
+const { blocks } = Astro.props;
+---
+
+{blocks.map((block) => {
+  switch (block.blockType) {
+    case 'hero-slider':
+      return <HeroSlider slides={(block as any).slides ?? []} autoAdvance={(block as any).autoAdvance} />;
+    case 'hero-simple':
+      return <HeroSimple block={block as any} />;
+    case 'rich-text':
+      return <RichTextBlock block={block as any} />;
+    case 'section-heading':
+      return <SectionHeading block={block as any} />;
+    case 'card-grid':
+      return <CardGrid block={block as any} />;
+    case 'icon-card-grid':
+      return <QuickLinks cards={(block as any).cards ?? []} columns={(block as any).columns} />;
+    case 'news-feature':
+      return <NewsFeature block={block as any} />;
+    case 'team-grid':
+      return <TeamGrid block={block as any} />;
+    case 'contact-split':
+      return <ContactSplit block={block as any} />;
+    case 'map-embed':
+      return <MapEmbed block={block as any} />;
+    case 'form-block':
+      return <FormBlock block={block as any} />;
+    case 'cta-banner':
+      return <CTABanner block={block as any} />;
+    case 'event-list':
+      return <EventList block={block as any} />;
+    case 'faq-accordion':
+      return <FaqAccordion block={block as any} />;
+    case 'spacer':
+      return <Spacer block={block as any} />;
+    case 'donation-form':
+      return <DonationForm block={block as any} />;
+    default:
+      return null;
+  }
+})}

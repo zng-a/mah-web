@@ -1,0 +1,79 @@
+---
+import { mediaUrl, getLatestNews, getServices } from '../../lib/payload';
+import type { News, Service } from '../../lib/payload';
+
+interface ManualCard {
+  image?: unknown;
+  title: string;
+  description?: string | null;
+  linkLabel?: string | null;
+  linkUrl?: string | null;
+}
+
+interface Props {
+  block: {
+    source?: 'manual' | 'news' | 'services' | null;
+    cards?: ManualCard[] | null;
+    limit?: number | null;
+    columns?: '2' | '3' | '4' | null;
+    background?: 'white' | 'teal-tint' | null;
+  };
+}
+
+const { block } = Astro.props;
+const cols = block.columns ?? '3';
+const gridCols = cols === '2' ? 'lg:grid-cols-2' : cols === '4' ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
+const bgClass = block.background === 'teal-tint' ? 'bg-teal-tint' : '';
+const limit = block.limit ?? 6;
+
+// Build card data based on source
+type CardData = { image?: string; title: string; description?: string; href?: string };
+let cards: CardData[] = [];
+
+if (block.source === 'news') {
+  const news = await getLatestNews(limit).catch(() => [] as News[]);
+  cards = news.map((n) => ({
+    image: mediaUrl(n.featuredImage, 'card'),
+    title: n.title,
+    description: n.excerpt ?? undefined,
+    href: `/news/${n.slug}`,
+  }));
+} else if (block.source === 'services') {
+  const services = await getServices(limit).catch(() => [] as Service[]);
+  cards = services.map((s) => ({
+    image: mediaUrl(s.featuredImage, 'card'),
+    title: s.title,
+    description: s.shortDescription ?? undefined,
+    href: `/services/${s.slug}`,
+  }));
+} else {
+  cards = (block.cards ?? []).map((c) => ({
+    image: mediaUrl(c.image as any, 'card'),
+    title: c.title,
+    description: c.description ?? undefined,
+    href: c.linkUrl ?? undefined,
+  }));
+}
+---
+
+<section class={`px-5 md:px-10 py-8 lg:py-12 ${bgClass}`}>
+  <div class="max-w-[1440px] mx-auto">
+    <div class={`grid grid-cols-1 sm:grid-cols-2 ${gridCols} gap-5 lg:gap-6`}>
+      {cards.map((card) => (
+        <a href={card.href || '#'} class="group bg-white rounded-xl lg:rounded-2xl overflow-hidden border border-navy/5 hover:shadow-lg transition-shadow">
+          {card.image && (
+            <div class="aspect-[16/10] overflow-hidden">
+              <img src={card.image} alt={card.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            </div>
+          )}
+          <div class="p-5 lg:p-6">
+            <h3 class="text-[17px] lg:text-[20px] font-bold text-navy group-hover:text-teal transition-colors">{card.title}</h3>
+            {card.description && (
+              <p class="text-muted text-[14px] lg:text-[15px] mt-2 line-clamp-3">{card.description}</p>
+            )}
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
