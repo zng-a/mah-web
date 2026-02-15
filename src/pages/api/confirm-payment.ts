@@ -18,11 +18,16 @@ export const POST: APIRoute = async ({ request }) => {
 
     const data = await res.json();
 
+    if (!res.ok) {
+      console.error('Confirm payment error from Payload:', res.status, data);
+    }
+
     return new Response(JSON.stringify(data), {
       status: res.status,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch {
+  } catch (err) {
+    console.error('Confirm payment proxy failed:', err);
     return new Response(JSON.stringify({ error: 'Failed to confirm payment' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -9,10 +9,12 @@ const { donate } = Astro.props;
 
 const amounts = donate.amounts?.map(a => a.value) ?? [5, 10, 20, 50, 100];
 const defaultAmount = donate.defaultAmount ?? 10;
-const frequencies = donate.frequencies ?? [
+const QUICK_DONATE_FREQUENCIES = ['one-off', 'monthly'];
+const allFrequencies = donate.frequencies ?? [
   { label: 'One Time', value: 'one-off' },
   { label: 'Monthly', value: 'monthly' },
 ];
+const frequencies = allFrequencies.filter(f => QUICK_DONATE_FREQUENCIES.includes(f.value));
 const defaultFrequency = donate.defaultFrequency ?? 'one-off';
 const heading = donate.heading ?? 'Donate';
 const description = donate.description ?? 'Your contribution will help us to maintain and develop the wide range of services we offer. Prophet Muhammad \uFDFA said: "Allah said: \'Spend, O son of Adam, and I shall spend on you.\'"';

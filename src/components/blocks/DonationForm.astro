@@ -32,6 +32,7 @@ const frequencies = block.frequencies?.length
   ? block.frequencies
   : [
       { label: 'One-off', value: 'one-off' },
+      { label: 'Daily', value: 'daily' },
       { label: 'Weekly', value: 'weekly' },
       { label: 'Monthly', value: 'monthly' },
       { label: 'Yearly', value: 'yearly' },
@@ -128,7 +129,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         <!-- ═══ Frequency ═══ -->
         <div class="mb-6">
           <label class="df-label">Frequency</label>
-          <div class="grid grid-cols-4 gap-[6px] df-freq-grid">
+          <div class="grid grid-cols-5 gap-[6px] df-freq-grid">
             {frequencies.map((freq) => (
               <button
                 type="button"
@@ -151,8 +152,9 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
 
         <!-- ═══ Gift Aid ═══ -->
         <div class="df-giftaid-wrap mb-6">
-          <div class="bg-green-tint border border-green/15 rounded-[16px] p-4 sm:p-5">
-            <label class="flex items-start gap-3 cursor-pointer select-none">
+          <div class="bg-green-tint border border-green/30 rounded-[16px] p-4 sm:p-5 relative">
+            <img src="/images/gift-aid-logo.png" alt="Gift Aid" class="absolute top-4 right-4 sm:top-5 sm:right-5 w-[72px] sm:w-[80px] h-auto opacity-80" />
+            <label class="flex items-start gap-3 cursor-pointer select-none pr-[80px] sm:pr-[88px]">
               <div class="relative mt-[2px] shrink-0">
                 <input type="checkbox" class="df-giftaid-check peer sr-only" />
                 <div class="w-[22px] h-[22px] rounded-[6px] border-2 border-green/30 bg-white peer-checked:bg-green peer-checked:border-green transition-all duration-200 flex items-center justify-center">
@@ -163,12 +165,12 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
               <div>
                 <span class="block text-navy text-[15px] sm:text-[16px] font-bold leading-snug">
                   Add Gift Aid
-                  <span class="inline-block ml-1.5 bg-green/10 text-green text-[11px] sm:text-[12px] font-bold px-2 py-[2px] rounded-full align-middle">
+                  <span class="inline-block ml-1.5 bg-green/15 text-green text-[11px] sm:text-[12px] font-bold px-2 py-[2px] rounded-full align-middle">
                     +25%
                   </span>
                 </span>
-                <span class="block text-navy/60 text-[13px] sm:text-[14px] leading-[1.5] mt-0.5">
-                  Make your <span class="df-giftaid-amount font-semibold text-navy/80">&pound;{defaultAmount}</span> worth
+                <span class="block text-navy/80 text-[13px] sm:text-[14px] leading-[1.5] mt-0.5">
+                  Make your <span class="df-giftaid-amount font-semibold text-navy">&pound;{defaultAmount}</span> worth
                   <span class="df-giftaid-total font-bold text-green">&pound;{Math.round(defaultAmount * 1.25 * 100) / 100}</span>
                   at no extra cost
                 </span>
@@ -177,9 +179,9 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
 
             <!-- Gift Aid expanded fields -->
             <div class="df-giftaid-fields" style="display:none;">
-              <div class="mt-4 pt-4 border-t border-green/10">
+              <div class="mt-4 pt-4 border-t border-green/25">
                 <!-- Declaration -->
-                <p class="text-[12px] sm:text-[13px] text-navy/50 leading-[1.6] mb-4">
+                <p class="text-[12px] sm:text-[13px] text-navy/70 leading-[1.6] mb-4">
                   I confirm I am a UK taxpayer and understand that if I pay less Income Tax and/or
                   Capital Gains Tax than the amount of Gift Aid claimed on all my donations in that tax
                   year it is my responsibility to pay any difference.
@@ -231,11 +233,28 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           />
         </div>
 
-        <!-- ═══ Card Payment ═══ -->
+        <!-- ═══ Payment Method ═══ -->
         <div class="mb-6">
-          <label class="df-label">Card details</label>
-          <div id="card-element" class="bg-navy/[0.04] rounded-[14px] py-[15px] px-4 transition-all focus-within:ring-2 focus-within:ring-teal/40"></div>
-          <div id="card-errors" class="text-red-500 text-[13px] mt-1.5 hidden"></div>
+          <label class="df-label">Payment method</label>
+          <div id="payment-element"></div>
+          <div id="payment-errors" class="text-red-500 text-[13px] mt-1.5 hidden"></div>
+        </div>
+
+        <!-- ═══ Cover Transaction Fees ═══ -->
+        <div class="mb-6">
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <div class="relative mt-[2px] shrink-0">
+              <input type="checkbox" class="df-cover-fees-check sr-only" />
+              <div class="df-cover-fees-box w-[22px] h-[22px] rounded-[6px] border-2 border-navy/20 bg-white transition-all duration-200 flex items-center justify-center">
+                <svg class="df-cover-fees-tick w-3 h-3 text-white opacity-0 transition-opacity" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L4 8.5L11 1.5"/></svg>
+              </div>
+            </div>
+            <span class="text-navy text-[14px] sm:text-[15px] leading-snug">
+              Cover the transaction fee of
+              <span class="df-fee-amount font-bold text-teal">&pound;0.00</span>
+              so we receive your full donation
+            </span>
+          </label>
         </div>
 
         <!-- ═══ Donate Button ═══ -->
@@ -289,21 +308,22 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
     width: 100%;
     height: 44px;
     padding: 0 14px;
-    background: rgba(15, 36, 62, 0.04);
-    border: none;
+    background: white;
+    border: 1.5px solid rgba(15, 36, 62, 0.15);
     border-radius: 12px;
     font-family: inherit;
     font-size: 15px;
     font-weight: 500;
     color: var(--color-navy);
     outline: none;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, border-color 0.2s;
   }
   .df-input:focus {
-    box-shadow: 0 0 0 2px rgba(68, 131, 158, 0.35);
+    border-color: rgba(68, 131, 158, 0.5);
+    box-shadow: 0 0 0 2px rgba(68, 131, 158, 0.2);
   }
   .df-input::placeholder {
-    color: rgba(15, 36, 62, 0.3);
+    color: rgba(15, 36, 62, 0.45);
     font-weight: 400;
   }
 
@@ -339,6 +359,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       let isCustom = false;
       let isLoading = false;
       let giftAid = false;
+      let coverFees = false;
 
       const amountBtns = form.querySelectorAll<HTMLButtonElement>('.df-amount');
       const freqBtns = form.querySelectorAll<HTMLButtonElement>('.df-freq');
@@ -355,6 +376,12 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       const giftAidAmount = form.querySelector<HTMLElement>('.df-giftaid-amount');
       const giftAidTotal = form.querySelector<HTMLElement>('.df-giftaid-total');
       const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
+      const paymentContainer = form.querySelector<HTMLElement>('#payment-element');
+      const paymentErrors = form.querySelector<HTMLElement>('#payment-errors');
+      const coverFeesCheck = form.querySelector<HTMLInputElement>('.df-cover-fees-check');
+      const coverFeesBox = form.querySelector<HTMLElement>('.df-cover-fees-box');
+      const coverFeesTick = form.querySelector<HTMLElement>('.df-cover-fees-tick');
+      const feeAmountEl = form.querySelector<HTMLElement>('.df-fee-amount');
 
       // ── Helpers ──
 
@@ -363,10 +390,32 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         return btn?.dataset.freqLabel || '';
       }
 
+      // Stripe UK charity rate: 1.2% + 20p per transaction
+      const STRIPE_RATE = 0.012;
+      const STRIPE_FIXED = 0.20;
+
+      function calculateFee(amount: number): number {
+        // Total to charge = (amount + fixed) / (1 - rate)
+        // Fee = total - amount
+        const total = (amount + STRIPE_FIXED) / (1 - STRIPE_RATE);
+        return Math.round((total - amount) * 100) / 100;
+      }
+
+      function getChargeAmount(): number {
+        if (!coverFees) return selectedAmount;
+        return Math.round((selectedAmount + calculateFee(selectedAmount)) * 100) / 100;
+      }
+
+      function updateFeeDisplay() {
+        const fee = calculateFee(selectedAmount);
+        if (feeAmountEl) feeAmountEl.innerHTML = `&pound;${fee.toFixed(2)}`;
+      }
+
       function updateCTA() {
         if (!ctaText || isLoading) return;
+        const displayAmount = getChargeAmount();
         const freqText = selectedFrequency === 'one-off' ? '' : ` ${getFreqLabel()}`;
-        ctaText.innerHTML = `Donate &pound;${selectedAmount}${freqText}`;
+        ctaText.innerHTML = `Donate &pound;${displayAmount.toFixed(2)}${freqText}`;
       }
 
       function updateGiftAidDisplay() {
@@ -375,6 +424,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           const total = Math.round(selectedAmount * 1.25 * 100) / 100;
           giftAidTotal.innerHTML = `&pound;${total}`;
         }
+        updateFeeDisplay();
       }
 
       function showError(msg: string) {
@@ -431,7 +481,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           selectedFundName = btn.dataset.fundName || '';
           activateBtn(btn, fundBtns,
             ['bg-navy', 'text-white', 'shadow-sm'],
-            ['bg-navy/[0.04]', 'text-navy'],
+            ['bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]'],
           );
         });
       });
@@ -451,10 +501,12 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           }
           activateBtn(btn, amountBtns,
             ['bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]'],
-            ['bg-navy/[0.04]', 'text-navy'],
+            ['bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]'],
           );
           updateCTA();
           updateGiftAidDisplay();
+          // Update Payment Element amount (client-side only)
+          updateElementsAmount();
         });
       });
 
@@ -464,19 +516,46 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           selectedAmount = val;
           updateCTA();
           updateGiftAidDisplay();
+          updateElementsAmount();
         }
       });
 
       // ── Frequency selection ──
       freqBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          selectedFrequency = btn.dataset.freq || 'one-off';
+          const newFreq = btn.dataset.freq || 'one-off';
+          const oldIsRecurring = selectedFrequency !== 'one-off';
+          const newIsRecurring = newFreq !== 'one-off';
+          selectedFrequency = newFreq;
           activateBtn(btn, freqBtns,
             ['bg-navy', 'text-white'],
-            ['bg-navy/[0.04]', 'text-navy'],
+            ['bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]'],
           );
           updateCTA();
+
+          // If switching between one-off and recurring (or vice versa),
+          // we need to recreate the Elements instance with the new mode
+          if (oldIsRecurring !== newIsRecurring) {
+            recreateElements();
+          }
         });
+      });
+
+      // ── Cover Fees toggle ──
+      coverFeesCheck?.addEventListener('change', () => {
+        coverFees = coverFeesCheck.checked;
+        if (coverFeesBox) {
+          coverFeesBox.classList.toggle('bg-teal', coverFees);
+          coverFeesBox.classList.toggle('border-teal', coverFees);
+          coverFeesBox.classList.toggle('bg-white', !coverFees);
+          coverFeesBox.classList.toggle('border-navy/20', !coverFees);
+        }
+        if (coverFeesTick) {
+          coverFeesTick.classList.toggle('opacity-0', !coverFees);
+          coverFeesTick.classList.toggle('opacity-100', coverFees);
+        }
+        updateCTA();
+        updateElementsAmount();
       });
 
       // ── Gift Aid toggle ──
@@ -531,11 +610,92 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         return null;
       }
 
-      // ── Stripe.js setup ──
+      // ── Stripe.js setup (Payment Element with deferred intent) ──
       let stripe: any = null;
-      let cardElement: any = null;
-      const cardContainer = form.querySelector('#card-element');
-      const cardErrors = form.querySelector('#card-errors');
+      let elements: any = null;
+      let paymentElement: any = null;
+
+      const appearance = {
+        theme: 'stripe' as const,
+        variables: {
+          colorPrimary: '#44839e',
+          colorText: '#0f243e',
+          colorDanger: '#e53e3e',
+          fontFamily: 'Satoshi, system-ui, sans-serif',
+          fontSizeBase: '16px',
+          fontWeightNormal: '500',
+          borderRadius: '14px',
+          spacingUnit: '4px',
+        },
+        rules: {
+          '.Input': {
+            backgroundColor: 'rgba(15, 36, 62, 0.04)',
+            border: 'none',
+            boxShadow: 'none',
+            padding: '15px 16px',
+          },
+          '.Input:focus': {
+            boxShadow: '0 0 0 2px rgba(68, 131, 158, 0.4)',
+          },
+          '.Label': {
+            fontSize: '13px',
+            fontWeight: '700',
+            color: 'rgba(15, 36, 62, 0.45)',
+            textTransform: 'uppercase' as const,
+            letterSpacing: '0.04em',
+          },
+        },
+      };
+
+      function getAmountInPence(): number {
+        return Math.round(getChargeAmount() * 100);
+      }
+
+      function getElementsMode(): 'payment' | 'subscription' {
+        return selectedFrequency === 'one-off' ? 'payment' : 'subscription';
+      }
+
+      function createElements() {
+        if (!stripe) return;
+        const mode = getElementsMode();
+        elements = stripe.elements({
+          mode,
+          amount: getAmountInPence(),
+          currency: 'gbp',
+          // One-off payments need this to match the PI (required for Bacs mandates
+          // and automatic_payment_methods). Subscriptions handle it implicitly.
+          ...(mode === 'payment' && { setupFutureUsage: 'off_session' }),
+          appearance,
+        });
+        paymentElement = elements.create('payment', { layout: 'tabs' });
+        paymentElement.mount(paymentContainer);
+        paymentElement.on('change', (event: any) => {
+          if (paymentErrors) {
+            if (event.error) {
+              paymentErrors.textContent = event.error.message;
+              paymentErrors.classList.remove('hidden');
+            } else {
+              paymentErrors.textContent = '';
+              paymentErrors.classList.add('hidden');
+            }
+          }
+        });
+      }
+
+      function updateElementsAmount() {
+        if (!elements) return;
+        elements.update({ amount: getAmountInPence() });
+      }
+
+      function recreateElements() {
+        if (!stripe) return;
+        if (paymentElement) {
+          paymentElement.destroy();
+          paymentElement = null;
+        }
+        elements = null;
+        createElements();
+      }
 
       async function initStripe() {
         try {
@@ -555,38 +715,14 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           }
 
           stripe = (window as any).Stripe(data.publishableKey);
-          const elements = stripe.elements();
-          cardElement = elements.create('card', {
-            hidePostalCode: true,
-            style: {
-              base: {
-                fontFamily: 'Satoshi, system-ui, sans-serif',
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#0f243e',
-                '::placeholder': { color: 'rgba(15, 36, 62, 0.3)' },
-              },
-              invalid: { color: '#e53e3e' },
-            },
-          });
-          cardElement.mount(cardContainer);
-          cardElement.on('change', (event: any) => {
-            if (cardErrors) {
-              if (event.error) {
-                cardErrors.textContent = event.error.message;
-                cardErrors.classList.remove('hidden');
-              } else {
-                cardErrors.textContent = '';
-                cardErrors.classList.add('hidden');
-              }
-            }
-          });
+          createElements();
         } catch (err) {
           console.error('Failed to init Stripe:', err);
         }
       }
 
       initStripe();
+      updateFeeDisplay();
 
       // ── Submit ──
       ctaBtn?.addEventListener('click', async () => {
@@ -599,7 +735,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           return;
         }
 
-        if (!stripe || !cardElement) {
+        if (!stripe || !elements) {
           showError('Payment system is still loading. Please try again in a moment.');
           return;
         }
@@ -607,11 +743,12 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         setLoading(true);
 
         const donorData: Record<string, unknown> = {
-          amount: selectedAmount,
+          amount: getChargeAmount(),
           frequency: selectedFrequency,
           fund: selectedFundId || undefined,
           fundName: selectedFundName || undefined,
           donorEmail: emailInput?.value?.trim(),
+          coversFees: coverFees,
           giftAid,
         };
 
@@ -629,7 +766,13 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         }
 
         try {
-          // Step 1: Create PaymentIntent or Subscription on our server
+          // Step 1: Validate the Payment Element (client-side)
+          const { error: submitError } = await elements.submit();
+          if (submitError) {
+            throw new Error(submitError.message || 'Please check your payment details.');
+          }
+
+          // Step 2: Create PaymentIntent or Subscription on our server
           const res = await fetch('/api/create-checkout-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -642,46 +785,62 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
             throw new Error(data.error || 'Failed to create payment');
           }
 
-          // Step 2: Confirm payment with Stripe.js
-          const { error, paymentIntent: confirmedPI } = await stripe.confirmCardPayment(data.clientSecret, {
-            payment_method: {
-              card: cardElement,
-              billing_details: {
-                email: emailInput?.value?.trim(),
-                ...(donorData.donorName && { name: donorData.donorName as string }),
-                ...(donorData.address && {
-                  address: {
-                    line1: (donorData.address as any).line1 || undefined,
-                    line2: (donorData.address as any).line2 || undefined,
-                    city: (donorData.address as any).city || undefined,
-                    postal_code: (donorData.address as any).postcode || undefined,
-                    country: 'GB',
-                  },
-                }),
-              },
-            },
+          // Build return_url with donor context for the complete page
+          const addr = donorData.address as any;
+          const returnParams = new URLSearchParams({
+            donorEmail: emailInput?.value?.trim() || '',
+            frequency: selectedFrequency,
+            coversFees: String(coverFees),
+            giftAid: String(giftAid),
+            ...(selectedFundId && { fund: selectedFundId }),
+            ...(selectedFundName && { fundName: selectedFundName }),
+            ...(donorData.donorName ? { donorName: donorData.donorName as string } : {}),
+            ...(addr?.line1 ? { addrLine1: addr.line1 } : {}),
+            ...(addr?.line2 ? { addrLine2: addr.line2 } : {}),
+            ...(addr?.city ? { addrCity: addr.city } : {}),
+            ...(addr?.postcode ? { addrPostcode: addr.postcode } : {}),
+          });
+          const returnUrl = `${window.location.origin}/donate/complete?${returnParams.toString()}`;
+
+          // Step 3: Confirm payment with Stripe.js
+          // redirect: 'if_required' means cards/wallets resolve inline, Bacs/3DS redirect
+          const { error, paymentIntent: confirmedPI } = await stripe.confirmPayment({
+            elements,
+            clientSecret: data.clientSecret,
+            confirmParams: { return_url: returnUrl },
+            redirect: 'if_required',
           });
 
           if (error) {
             throw new Error(error.message || 'Payment failed');
           }
 
-          // Step 3: Record the donation in our database
-          await fetch('/api/confirm-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              paymentIntentId: confirmedPI?.id,
-              donorEmail: emailInput?.value?.trim(),
-              donorName: donorData.donorName || undefined,
-              fund: selectedFundId || undefined,
-              fundName: selectedFundName || undefined,
-              frequency: selectedFrequency,
-              giftAid,
-            }),
-          }).catch(() => {}); // Non-blocking — webhook is the fallback
+          // Inline success (cards/wallets) — record and redirect
+          const paymentIntentId = confirmedPI?.id || data.paymentIntentId;
+          try {
+            const confirmRes = await fetch('/api/confirm-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                paymentIntentId,
+                donorEmail: emailInput?.value?.trim(),
+                donorName: donorData.donorName || undefined,
+                fund: selectedFundId || undefined,
+                fundName: selectedFundName || undefined,
+                frequency: selectedFrequency,
+                coversFees: coverFees,
+                giftAid,
+                ...(donorData.address && { address: donorData.address }),
+              }),
+            });
+            if (!confirmRes.ok) {
+              const err = await confirmRes.json().catch(() => ({}));
+              console.error('Confirm payment failed:', err);
+            }
+          } catch (e) {
+            console.error('Confirm payment error:', e);
+          }
 
-          // Success — redirect to thank you page
           window.location.href = '/donate/success';
         } catch (err) {
           setLoading(false);
