@@ -8,7 +8,9 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare({
     imageService: 'compile',
-    mode: 'directory'
+    routes: {
+      strategy: 'auto'
+    }
   }),
   vite: {
     plugins: [tailwindcss()],
