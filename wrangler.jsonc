@@ -1,8 +1,4 @@
 {
-  "name": "qis-web",
-  "compatibility_date": "2026-01-28",
-  "main": "./dist/_worker.js",
-  "assets": {
-    "directory": "./dist/client"
-  }
+  "name": "mah-web",
+  "compatibility_date": "2026-01-28"
 }
