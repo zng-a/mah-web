@@ -1,0 +1,77 @@
+---
+import '../styles/global.css';
+import DonationForm from '../components/blocks/DonationForm.astro';
+import { getDonateSettings } from '../lib/payload';
+
+const donateSettings = await getDonateSettings();
+
+const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
+const TENANT_ID = import.meta.env.TENANT_ID || '';
+
+const stripeRes = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
+  .then(r => r.json())
+  .catch(() => ({ publishableKey: '' }));
+
+const publishableKey = stripeRes?.publishableKey ?? '';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <title>Donate - Masjid Al-Hikmah</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Satoshi', -apple-system, system-ui, sans-serif;
+        background: #f5f5f5;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header style="background: #0A1C30; padding: 40px 20px 30px; text-align: center;">
+      <img
+        src="/images/logo-white.png"
+        alt="Masjid Al-Hikmah"
+        style="width: 150px; height: auto; margin: 0 auto;"
+      />
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav style="display: flex; background: #0A1C30; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+      <a href="/mobile" style="flex: 1; padding: 18px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 18px; text-decoration: none; border-bottom: 3px solid transparent;">
+        Salah
+      </a>
+      <a href="/mobile-donate" style="flex: 1; padding: 18px; text-align: center; color: white; font-weight: 700; font-size: 18px; text-decoration: none; background: rgba(255,255,255,0.15); border-bottom: 3px solid white;">
+        Donate
+      </a>
+      <a href="/news-mobile" style="flex: 1; padding: 18px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 18px; text-decoration: none; border-bottom: 3px solid transparent;">
+        News
+      </a>
+    </nav>
+
+    <!-- Content -->
+    <main style="padding: 0; max-width: 600px; margin: 0 auto;">
+      <DonationForm
+        block={{
+          heading: donateSettings?.heading || 'Support Our Masjid',
+          description: donateSettings?.description || 'Your donations help us maintain the masjid and serve our community.',
+          funds: donateSettings?.funds || [],
+          amounts: donateSettings?.amounts || [{ value: 5 }, { value: 10 }, { value: 20 }, { value: 50 }],
+          frequencies: donateSettings?.frequencies || [
+            { label: 'One-time', value: 'one-time' },
+            { label: 'Monthly', value: 'monthly' }
+          ],
+          style: 'card',
+          publishableKey: publishableKey,
+        }}
+      />
+    </main>
+  </body>
+</html>

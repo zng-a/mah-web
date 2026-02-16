@@ -15,7 +15,7 @@ const imgSrc = mediaUrl(block.image as any, 'hero') || '/images/hero.jpeg';
 const opacity = block.overlayOpacity === '40' ? 'bg-black/40' : block.overlayOpacity === '15' ? 'bg-black/15' : 'bg-black/25';
 ---
 
-<section class="relative rounded-b-[24px] md:rounded-b-[40px] overflow-hidden h-[280px] sm:h-[350px] lg:h-[450px]">
+<section class="relative rounded-b-[24px] md:rounded-b-[40px] overflow-hidden h-[220px] sm:h-[260px] lg:h-[320px] -mt-[52px] pt-[52px]">
   <img src={imgSrc} alt={block.title} class="absolute inset-0 w-full h-full object-cover" />
   <div class={`absolute inset-0 ${opacity}`}></div>
   <div class="relative z-10 flex flex-col justify-end h-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pb-10 lg:pb-14">

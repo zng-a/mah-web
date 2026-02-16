@@ -76,6 +76,7 @@ export interface SiteSettings {
   tagline?: string | null;
   defaultMetaDescription?: string | null;
   defaultOgImage?: (string | null) | Media;
+  themeColor?: string | null;
   socialLinks?:
     | {
         platform?: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'whatsapp';
@@ -106,6 +107,36 @@ export interface DonateSettings {
   funds?: (string | DonationFund)[] | null;
   defaultFund?: (string | DonationFund) | null;
   successMessage?: string | null;
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  slug: string;
+  description?: unknown;
+  type: 'fixed-unit' | 'ramadan-nightly' | 'fixed-installments';
+  fixedUnitConfig?: {
+    pricePerUnit: number;
+    unitName: string;
+    maxQuantity: number;
+  };
+  ramadanConfig?: {
+    ramadanStartDate: string;
+    ramadanEndDate: string;
+  };
+  installmentsConfig?: {
+    totalAmount: number;
+    numberOfInstallments: number;
+    installmentFrequency: 'weekly' | 'monthly';
+  };
+  fund?: DonationFund | string;
+  startDate?: string;
+  endDate?: string;
+  goalAmount?: number;
+  currentAmount: number;
+  active: boolean;
+  featuredImage?: Media;
+  order: number;
 }
 
 export interface HeroSlide {
@@ -290,6 +321,23 @@ export async function getDonationFunds(): Promise<DonationFund[]> {
     'where[active][equals]=true&sort=order&depth=0',
   );
   return result.docs;
+}
+
+export async function getCampaigns(filters: { active?: boolean } = {}): Promise<Campaign[]> {
+  let query = 'sort=order&depth=1';
+  if (filters.active !== undefined) {
+    query += `&where[active][equals]=${filters.active}`;
+  }
+  const result = await getCollection<Campaign>('campaigns', query);
+  return result.docs;
+}
+
+export async function getCampaignBySlug(slug: string): Promise<Campaign | null> {
+  const result = await getCollection<Campaign>(
+    'campaigns',
+    `where[slug][equals]=${slug}&limit=1&depth=1`,
+  );
+  return result.docs[0] ?? null;
 }
 
 /** Resolve a media field to its full URL. Prepends PAYLOAD_URL for relative paths. */

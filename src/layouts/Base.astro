@@ -38,6 +38,19 @@ const navLinks = header?.navLinks ?? [];
 // Prayer times for the header table (only the 5 main salah)
 const mainPrayers = prayerData?.prayers.filter(p => p.name !== 'Sunrise') ?? [];
 const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
+
+// Theme color from CMS (defaults to teal if not set)
+const themeColor = siteSettings?.themeColor ?? '#44839e';
+
+// Get current page path for active nav state
+const currentPath = Astro.url.pathname;
+
+// Helper function to check if a nav link is active
+function isLinkActive(linkHref: string): boolean {
+  if (!linkHref || linkHref === '#') return false;
+  // Match exact path or if current path starts with link path (for sub-pages)
+  return currentPath === linkHref || (linkHref !== '/' && currentPath.startsWith(linkHref));
+}
 ---
 
 <html lang="en">
@@ -48,6 +61,11 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
     {siteSettings?.defaultMetaDescription && <meta name="description" content={siteSettings.defaultMetaDescription} />}
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
     <title>{pageTitle}</title>
+    <style define:vars={{ themeColor }}>
+      :root {
+        --color-teal: var(--themeColor);
+      }
+    </style>
   </head>
   <body class="bg-white">
 
@@ -88,7 +106,9 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
     <!-- ===== TOP BAR ===== -->
     <header class="flex items-start justify-between px-5 md:px-10 pt-4 pb-2">
       <div class="shrink-0 z-20">
-        <img src={logoUrl} alt={siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'} class="w-[110px] md:w-[150px] h-auto" />
+        <a href="/">
+          <img src={logoUrl} alt={siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'} class="w-[110px] md:w-[150px] h-auto" />
+        </a>
       </div>
       {prayerData && (
         <div class="text-right pt-2 hidden lg:block">
@@ -138,7 +158,9 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
     <!-- ===== MOBILE MENU ===== -->
     <div id="mobile-menu" class="fixed inset-0 bg-white z-50 lg:hidden transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
       <div class="flex items-center justify-between px-5 pt-4 pb-2">
-        <img src={logoUrl} alt="QIS" class="w-[90px] h-auto" />
+        <a href="/">
+          <img src={logoUrl} alt="QIS" class="w-[90px] h-auto" />
+        </a>
         <button id="menu-close" class="text-navy p-2" aria-label="Close menu">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -171,12 +193,13 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
       <nav class="px-5 pt-6 pb-8">
         <div class="space-y-1">
           {navLinks.length > 0
-            ? navLinks.map((link, i) => {
+            ? navLinks.map((link) => {
                 const href = link.linkType === 'custom' ? (link.url || '#') : (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
+                const isActive = isLinkActive(href);
                 return (
                   <a
                     href={href}
-                    class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${i === 0 ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}
+                    class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${isActive ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}
                     target={link.openInNewTab ? '_blank' : undefined}
                     rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
                   >
@@ -186,9 +209,9 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
               })
             : (
               <>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl bg-teal-tint transition-colors">Home</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Salah Times</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Donate</a>
+                <a href="/" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Home</a>
+                <a href="/salah-times" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/salah-times' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Salah Times</a>
+                <a href="/donate" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath.startsWith('/donate') ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Donate</a>
                 <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">About QIS</a>
                 <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Services</a>
                 <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">News</a>
@@ -237,13 +260,14 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
     <!-- ===== NAVIGATION ===== -->
     <nav class="relative z-20 bg-teal rounded-b-[24px] hidden lg:flex items-center justify-center gap-1 py-3 text-white text-[15px] font-semibold">
       {navLinks.length > 0
-        ? navLinks.map((link, i) => {
+        ? navLinks.map((link) => {
             const href = link.linkType === 'custom' ? (link.url || '#') : (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
             const hasChildren = link.children && link.children.length > 0;
+            const isActive = isLinkActive(href);
             return (
               <a
                 href={href}
-                class={`px-5 py-2 rounded-xl transition-colors ${i === 0 ? 'bg-white/20' : 'hover:bg-white/10'} ${hasChildren ? 'flex items-center gap-1' : ''}`}
+                class={`px-5 py-2 rounded-xl transition-colors ${isActive ? 'bg-white/20' : 'hover:bg-white/10'} ${hasChildren ? 'flex items-center gap-1' : ''}`}
                 target={link.openInNewTab ? '_blank' : undefined}
                 rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
               >
@@ -256,9 +280,9 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
           })
         : (
           <>
-            <a href="#" class="bg-white/20 px-5 py-2 rounded-xl transition-colors">Home</a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Salah Times</a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Donate</a>
+            <a href="/" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Home</a>
+            <a href="/salah-times" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/salah-times' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Salah Times</a>
+            <a href="/donate" class={`px-5 py-2 rounded-xl transition-colors ${currentPath.startsWith('/donate') ? 'bg-white/20' : 'hover:bg-white/10'}`}>Donate</a>
             <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
               About QIS
               <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -290,7 +314,7 @@ const nextPrayerName = prayerData?.nextPrayer?.name ?? null;
                 {footer.address.line2 && <>{footer.address.line2}<br /></>}
                 {footer.address.city && footer.address.postcode && <>{footer.address.city}, {footer.address.postcode}</>}
               </address>
-              <a href="#" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
+              <a href="https://maps.app.goo.gl/7exKUquSwuD6tGyh7" target="_blank" rel="noopener noreferrer" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
             </div>
           )}
 

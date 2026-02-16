@@ -1,5 +1,5 @@
 ---
-import type { DonationFund } from '../../lib/payload';
+import type { DonationFund, Campaign } from '../../lib/payload';
 
 interface Props {
   block: {
@@ -10,6 +10,13 @@ interface Props {
     frequencies?: { label: string; value: string; id?: string | null }[] | null;
     style?: 'card' | 'full' | null;
     publishableKey?: string | null;
+    campaign?: Campaign;
+    campaignType?: 'fixed-unit' | 'ramadan-nightly' | 'fixed-installments';
+    ramadanStartDate?: string;
+    totalInstallments?: number;
+    hideAmountSelector?: boolean;
+    hideFundSelector?: boolean;
+    hideFrequencySelector?: boolean;
   };
 }
 
@@ -50,9 +57,15 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       class={`donation-form ${style === 'card' ? 'bg-white rounded-[28px] shadow-[0_4px_40px_rgba(15,36,62,0.08)] overflow-hidden' : ''}`}
       data-default-amount={defaultAmount}
       data-default-frequency={defaultFrequency}
+      data-default-freq-label={freqLabel(defaultFrequency)}
       data-default-fund-id={defaultFund?.id ?? ''}
       data-default-fund-name={defaultFund?.name ?? ''}
       data-publishable-key={publishableKey}
+      data-campaign-id={block.campaign?.id ?? ''}
+      data-campaign-type={block.campaignType ?? ''}
+      data-ramadan-start-date={block.ramadanStartDate ?? ''}
+      data-total-installments={block.totalInstallments ?? ''}
+      data-campaign-quantity="1"
     >
       <!-- ═══ Header ═══ -->
       <div class="bg-navy px-6 sm:px-8 pt-7 pb-6 text-center">
@@ -66,7 +79,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
 
       <div class="px-6 sm:px-8 pt-6 pb-8">
         <!-- ═══ Fund Selector ═══ -->
-        {funds.length > 1 && (
+        {!block.hideFundSelector && funds.length > 1 && (
           <div class="mb-6">
             <label class="df-label">Donate to</label>
             <div class="flex flex-wrap gap-[6px] df-fund-grid">
@@ -89,6 +102,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         )}
 
         <!-- ═══ Amount Grid ═══ -->
+        {!block.hideAmountSelector && (
         <div class="mb-5">
           <label class="df-label">Amount</label>
           <div class="grid grid-cols-3 gap-[6px] df-amount-grid">
@@ -125,8 +139,10 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
             />
           </div>
         </div>
+        )}
 
         <!-- ═══ Frequency ═══ -->
+        {!block.hideFrequencySelector && (
         <div class="mb-6">
           <label class="df-label">Frequency</label>
           <div class="grid grid-cols-5 gap-[6px] df-freq-grid">
@@ -146,6 +162,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
             ))}
           </div>
         </div>
+        )}
 
         <!-- ═══ Divider ═══ -->
         <div class="h-px bg-navy/[0.06] mb-6"></div>
@@ -386,8 +403,41 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       // ── Helpers ──
 
       function getFreqLabel(): string {
+        // Try to get from frequency button first
         const btn = form.querySelector<HTMLButtonElement>(`.df-freq[data-freq="${selectedFrequency}"]`);
-        return btn?.dataset.freqLabel || '';
+        if (btn?.dataset.freqLabel) return btn.dataset.freqLabel;
+
+        // Fall back to form data attribute (for hidden frequency selectors)
+        if (selectedFrequency === form.dataset.defaultFrequency) {
+          return form.dataset.defaultFreqLabel || '';
+        }
+
+        return '';
+      }
+
+      // Convert frequency label to "Every [Period]" format
+      function getFreqTextForButton(): string {
+        if (selectedFrequency === 'one-off') return '';
+
+        const label = getFreqLabel();
+
+        // Check if label has custom format like "Daily (30 nights)"
+        const match = label.match(/\((.+?)\)/);
+        if (match) {
+          // Extract the text in parentheses: "Daily (30 nights)" → "for 30 nights"
+          return ` for ${match[1]}`;
+        }
+
+        // Convert "Monthly" → "Month", "Weekly" → "Week", "Daily" → "Day", "Yearly" → "Year"
+        const periodMap: Record<string, string> = {
+          'Monthly': 'Month',
+          'Weekly': 'Week',
+          'Daily': 'Day',
+          'Yearly': 'Year',
+        };
+
+        const period = periodMap[label] || label;
+        return ` Every ${period}`;
       }
 
       // Stripe UK charity rate: 1.2% + 20p per transaction
@@ -414,7 +464,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       function updateCTA() {
         if (!ctaText || isLoading) return;
         const displayAmount = getChargeAmount();
-        const freqText = selectedFrequency === 'one-off' ? '' : ` ${getFreqLabel()}`;
+        const freqText = getFreqTextForButton();
         ctaText.innerHTML = `Donate &pound;${displayAmount.toFixed(2)}${freqText}`;
       }
 
@@ -724,6 +774,15 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       initStripe();
       updateFeeDisplay();
 
+      // ── Campaign amount update listener ──
+      form.addEventListener('campaign-amount-update', ((e: CustomEvent) => {
+        selectedAmount = e.detail.amount;
+        if (customRow) customRow.style.display = 'none';
+        updateCTA();
+        updateGiftAidDisplay();
+        updateElementsAmount();
+      }) as EventListener);
+
       // ── Submit ──
       ctaBtn?.addEventListener('click', async () => {
         if (isLoading) return;
@@ -750,7 +809,22 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           donorEmail: emailInput?.value?.trim(),
           coversFees: coverFees,
           giftAid,
+          campaignId: form.dataset.campaignId || undefined,
+          campaignType: form.dataset.campaignType || undefined,
+          quantity: form.dataset.campaignQuantity ? parseInt(form.dataset.campaignQuantity) : undefined,
+          ramadanStartDate: form.dataset.ramadanStartDate || undefined,
+          totalInstallments: form.dataset.totalInstallments ? parseInt(form.dataset.totalInstallments) : undefined,
         };
+
+        // Debug logging for campaign donations
+        if (donorData.campaignId) {
+          console.log('[Frontend] Submitting campaign donation:', {
+            campaignId: donorData.campaignId,
+            campaignType: donorData.campaignType,
+            quantity: donorData.quantity,
+            amount: donorData.amount
+          });
+        }
 
         if (giftAid) {
           donorData.donorName = [
@@ -802,43 +876,72 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           });
           const returnUrl = `${window.location.origin}/donate/complete?${returnParams.toString()}`;
 
-          // Step 3: Confirm payment with Stripe.js
-          // redirect: 'if_required' means cards/wallets resolve inline, Bacs/3DS redirect
-          const { error, paymentIntent: confirmedPI } = await stripe.confirmPayment({
-            elements,
-            clientSecret: data.clientSecret,
-            confirmParams: { return_url: returnUrl },
-            redirect: 'if_required',
-          });
+          // Step 3: Confirm payment or setup with Stripe.js
+          // For trial subscriptions (like Ramadan), we use confirmSetup for card verification
+          // For regular payments, we use confirmPayment
+          let paymentIntentId: string | undefined;
 
-          if (error) {
-            throw new Error(error.message || 'Payment failed');
+          if (data.isTrial && data.setupIntentId) {
+            // Trial subscription - verify card via setup intent
+            console.log('[Frontend] Confirming setup intent for trial subscription');
+            const { error: setupError } = await stripe.confirmSetup({
+              elements,
+              clientSecret: data.clientSecret,
+              confirmParams: { return_url: returnUrl },
+              redirect: 'if_required',
+            });
+
+            if (setupError) {
+              throw new Error(setupError.message || 'Card verification failed');
+            }
+
+            // For trial subscriptions, no immediate payment, so no paymentIntentId yet
+            paymentIntentId = undefined;
+          } else {
+            // Regular payment or subscription with immediate charge
+            console.log('[Frontend] Confirming payment intent');
+            const { error, paymentIntent: confirmedPI } = await stripe.confirmPayment({
+              elements,
+              clientSecret: data.clientSecret,
+              confirmParams: { return_url: returnUrl },
+              redirect: 'if_required',
+            });
+
+            if (error) {
+              throw new Error(error.message || 'Payment failed');
+            }
+
+            paymentIntentId = confirmedPI?.id || data.paymentIntentId;
           }
 
-          // Inline success (cards/wallets) — record and redirect
-          const paymentIntentId = confirmedPI?.id || data.paymentIntentId;
-          try {
-            const confirmRes = await fetch('/api/confirm-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                paymentIntentId,
-                donorEmail: emailInput?.value?.trim(),
-                donorName: donorData.donorName || undefined,
-                fund: selectedFundId || undefined,
-                fundName: selectedFundName || undefined,
-                frequency: selectedFrequency,
-                coversFees: coverFees,
-                giftAid,
-                ...(donorData.address && { address: donorData.address }),
-              }),
-            });
-            if (!confirmRes.ok) {
-              const err = await confirmRes.json().catch(() => ({}));
-              console.error('Confirm payment failed:', err);
+          // For trial subscriptions, skip confirm call (no payment intent yet - will be created at 10 PM)
+          if (paymentIntentId) {
+            try {
+              const confirmRes = await fetch('/api/confirm-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  paymentIntentId,
+                  subscriptionId: data.subscriptionId || undefined, // Pass subscription ID for metadata extraction
+                  donorEmail: emailInput?.value?.trim(),
+                  donorName: donorData.donorName || undefined,
+                  fund: selectedFundId || undefined,
+                  fundName: selectedFundName || undefined,
+                  frequency: selectedFrequency,
+                  coversFees: coverFees,
+                  giftAid,
+                  ...(donorData.address && { address: donorData.address }),
+                }),
+              });
+              if (!confirmRes.ok) {
+                const err = await confirmRes.json().catch(() => ({}));
+                console.error('Confirm payment failed:', err);
+              }
+            } catch (e) {
+              console.error('Confirm payment error:', e);
             }
-          } catch (e) {
-            console.error('Confirm payment error:', e);
+          } else {
+            console.log('[Frontend] Trial subscription - skipping confirm call (no payment intent yet)');
           }
 
           window.location.href = '/donate/success';

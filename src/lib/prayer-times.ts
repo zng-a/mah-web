@@ -54,6 +54,18 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+export interface MonthPrayerDay {
+  date: string;           // formatted "D MMM" e.g. "1 Feb"
+  gregorianDate: string;  // "YYYY-MM-DD"
+  hijriDate: string;
+  fajr: { begins: string; jamaah: string };
+  zuhr: { begins: string; jamaah: string };
+  asr: { begins: string; jamaah: string };
+  maghrib: { begins: string; jamaah: string };
+  isha: { begins: string; jamaah: string };
+  isToday: boolean;
+}
+
 export async function getTodayPrayerTimes(): Promise<PrayerTimesData | null> {
   try {
     const res = await fetch(PRAYER_API_URL);
@@ -105,6 +117,44 @@ export async function getTodayPrayerTimes(): Promise<PrayerTimesData | null> {
       hijriDate: today.hijri_date ?? '',
       isRamadan: today.is_ramadan === 1,
     };
+  } catch {
+    return null;
+  }
+}
+
+export async function getMonthPrayerTimes(): Promise<MonthPrayerDay[] | null> {
+  try {
+    const res = await fetch(PRAYER_API_URL);
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    const allDays: RawPrayerDay[] = json?.data?.prayer_times ?? json?.prayer_times ?? [];
+
+    // Get current month/year in UK timezone
+    const now = new Date();
+    const ukDate = now.toLocaleDateString('en-CA', { timeZone: 'Europe/London' }); // "YYYY-MM-DD"
+    const currentMonth = ukDate.substring(0, 7); // "YYYY-MM"
+
+    // Filter to current month only
+    const currentMonthDays = allDays.filter((day) => day.d_date.startsWith(currentMonth));
+
+    // Format each day for the monthly timetable
+    return currentMonthDays.map((day) => {
+      const d = new Date(day.d_date + 'T12:00:00');
+      const formattedDate = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+      return {
+        date: formattedDate,
+        gregorianDate: day.d_date,
+        hijriDate: day.hijri_date ?? '',
+        fajr: { begins: formatTime(day.fajr_begins), jamaah: formatTime(day.fajr_jamah) },
+        zuhr: { begins: formatTime(day.zuhr_begins), jamaah: formatTime(day.zuhr_jamah) },
+        asr: { begins: formatTime(day.asr_mithl_1), jamaah: formatTime(day.asr_jamah) },
+        maghrib: { begins: formatTime(day.maghrib_begins), jamaah: formatTime(day.maghrib_jamah) },
+        isha: { begins: formatTime(day.isha_begins), jamaah: formatTime(day.isha_jamah) },
+        isToday: day.d_date === ukDate,
+      };
+    });
   } catch {
     return null;
   }

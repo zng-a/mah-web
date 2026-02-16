@@ -1,0 +1,65 @@
+---
+import type { Campaign } from '../lib/payload'
+
+interface Props {
+  campaign?: Campaign
+  isGeneral?: boolean
+}
+
+const { campaign, isGeneral = false } = Astro.props
+const progress = campaign?.goalAmount
+  ? Math.min(100, (campaign.currentAmount / campaign.goalAmount) * 100)
+  : 0
+
+const href = isGeneral ? '#donation-form' : `/donate/${campaign?.slug}`
+---
+
+<a
+  href={href}
+  class:list={[
+    "group border rounded-xl lg:rounded-2xl px-4 lg:px-6 py-5 lg:py-7 flex flex-col items-center text-center transition-all duration-200",
+    isGeneral
+      ? "border-teal bg-teal/5 hover:bg-teal/10 hover:border-teal/80 hover:shadow-lg hover:shadow-teal/10"
+      : "border-navy/10 hover:border-teal hover:shadow-lg hover:shadow-teal/8"
+  ]}
+>
+  {/* Title */}
+  <span class="text-[15px] lg:text-[18px] font-bold text-navy mb-2">
+    {isGeneral ? 'General Donation' : campaign?.name}
+  </span>
+
+  {/* Campaign Info */}
+  {campaign?.goalAmount ? (
+    <div class="w-full">
+      <div class="flex items-baseline justify-center gap-1.5 text-[12px] lg:text-[13px] mb-2.5">
+        <span class="font-bold text-teal">£{campaign.currentAmount.toLocaleString()}</span>
+        <span class="text-muted">of £{campaign.goalAmount.toLocaleString()}</span>
+      </div>
+
+      {/* Progress Bar */}
+      <div class="relative h-1 lg:h-1.5 bg-navy/[0.08] rounded-full overflow-hidden">
+        <div
+          class="absolute inset-y-0 left-0 bg-gradient-to-r from-teal to-green transition-all duration-700 ease-out"
+          style={`width: ${progress}%`}
+        >
+          <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 animate-shimmer"></div>
+        </div>
+      </div>
+    </div>
+  ) : isGeneral ? (
+    <p class="text-[12px] lg:text-[13px] text-navy/60">
+      Support all services
+    </p>
+  ) : null}
+</a>
+
+<style>
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2.5s infinite;
+  }
+</style>
