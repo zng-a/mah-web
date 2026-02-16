@@ -1,0 +1,99 @@
+{
+	"version": 3,
+	"routes": [
+		{
+			"handle": "filesystem"
+		},
+		{
+			"src": "^/_astro/(.*)$",
+			"headers": {
+				"cache-control": "public, max-age=31536000, immutable"
+			},
+			"continue": true
+		},
+		{
+			"src": "^/_server-islands/([^/]+?)/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/_image/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/about/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/confirm-payment/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/create-checkout-session/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/stripe-publishable-key/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/contact/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/adopt-a-brick/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/cancel/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/complete/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/ramadan-giving/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/success/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/thousand-twelve/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/donate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/mobile/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/mobile-donate/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/news-mobile/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/salah-times/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/services/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/$",
+			"dest": "_render"
+		},
+		{
+			"src": "^(?:/(.*?))?/?$",
+			"dest": "_render"
+		}
+	]
+}

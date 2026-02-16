@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="About Us">
+  <main class="max-w-[1440px] mx-auto px-5 md:px-10 py-8 md:py-12 lg:py-16">
+
+    <!-- Page Header -->
+    <div class="text-center mb-10 lg:mb-14">
+      <h1 class="text-[36px] md:text-[48px] lg:text-[56px] font-bold text-navy leading-tight mb-3">
+        About Masjid Al-Hikmah
+      </h1>
+      <p class="text-[17px] md:text-[19px] lg:text-[21px] text-muted max-w-3xl mx-auto leading-relaxed">
+        A welcoming community dedicated to worship, learning, and service in East London
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-[900px] mx-auto space-y-8 lg:space-y-12">
+
+      <!-- Mission Section -->
+      <section class="bg-white rounded-[24px] lg:rounded-[32px] border-2 border-navy/5 p-8 lg:p-12">
+        <div class="flex items-center gap-3 mb-5 lg:mb-6">
+          <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-teal/10 flex items-center justify-center">
+            <svg class="w-5 h-5 lg:w-6 lg:h-6 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <h2 class="text-[24px] lg:text-[28px] font-bold text-navy">Our Mission</h2>
+        </div>
+        <p class="text-[16px] lg:text-[17px] text-muted leading-relaxed">
+          Masjid Al-Hikmah serves as a spiritual home for Muslims in East London, providing a welcoming space for daily prayers, Islamic education, and community support. We strive to foster a strong sense of brotherhood and sisterhood while promoting the true teachings of Islam based on the Qur'an and Sunnah.
+        </p>
+      </section>
+
+      <!-- History Section -->
+      <section class="bg-light-bg rounded-[24px] lg:rounded-[32px] p-8 lg:p-12">
+        <div class="flex items-center gap-3 mb-5 lg:mb-6">
+          <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green/10 flex items-center justify-center">
+            <svg class="w-5 h-5 lg:w-6 lg:h-6 text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h2 class="text-[24px] lg:text-[28px] font-bold text-navy">Our History</h2>
+        </div>
+        <p class="text-[16px] lg:text-[17px] text-muted leading-relaxed mb-4">
+          Established to serve the growing Muslim community in the area, Masjid Al-Hikmah has been a cornerstone of faith and community life for years. What began as a small prayer space has grown into an Islamic Centre.
+        </p>
+        <p class="text-[16px] lg:text-[17px] text-muted leading-relaxed">
+          Today, we continue to expand our services and facilities to meet the needs of our diverse congregation, from daily prayers and Friday Jumu'ah to educational programs and community events.
+        </p>
+      </section>
+
+      <!-- Services Grid -->
+      <section>
+        <h2 class="text-[26px] lg:text-[32px] font-bold text-navy mb-6 lg:mb-8 text-center">What We Offer</h2>
+        <div class="grid sm:grid-cols-2 gap-4 lg:gap-5">
+
+          <!-- Daily Prayers -->
+          <div class="bg-white rounded-[20px] lg:rounded-[24px] border-2 border-navy/5 p-6 lg:p-8 hover:border-teal/20 transition-all group">
+            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-teal/10 flex items-center justify-center mb-4 group-hover:bg-teal/15 transition-colors">
+              <svg class="w-6 h-6 lg:w-7 lg:h-7 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <h3 class="text-[18px] lg:text-[20px] font-bold text-navy mb-2">Daily Prayers</h3>
+            <p class="text-[14px] lg:text-[15px] text-muted leading-relaxed">
+              Five daily congregational prayers with separate facilities for men and women
+            </p>
+          </div>
+
+          <!-- Friday Jumu'ah -->
+          <div class="bg-white rounded-[20px] lg:rounded-[24px] border-2 border-navy/5 p-6 lg:p-8 hover:border-teal/20 transition-all group">
+            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-green/10 flex items-center justify-center mb-4 group-hover:bg-green/15 transition-colors">
+              <svg class="w-6 h-6 lg:w-7 lg:h-7 text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-[18px] lg:text-[20px] font-bold text-navy mb-2">Friday Jumu'ah</h3>
+            <p class="text-[14px] lg:text-[15px] text-muted leading-relaxed">
+              Weekly Friday prayers with inspiring khutbahs in English and Arabic
+            </p>
+          </div>
+
+          <!-- Islamic Education -->
+          <div class="bg-white rounded-[20px] lg:rounded-[24px] border-2 border-navy/5 p-6 lg:p-8 hover:border-teal/20 transition-all group">
+            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-teal/10 flex items-center justify-center mb-4 group-hover:bg-teal/15 transition-colors">
+              <svg class="w-6 h-6 lg:w-7 lg:h-7 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+            </div>
+            <h3 class="text-[18px] lg:text-[20px] font-bold text-navy mb-2">Islamic Education</h3>
+            <p class="text-[14px] lg:text-[15px] text-muted leading-relaxed">
+              Quran classes, Arabic lessons, and Islamic studies for all ages
+            </p>
+          </div>
+
+          <!-- Community Events -->
+          <div class="bg-white rounded-[20px] lg:rounded-[24px] border-2 border-navy/5 p-6 lg:p-8 hover:border-teal/20 transition-all group">
+            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-green/10 flex items-center justify-center mb-4 group-hover:bg-green/15 transition-colors">
+              <svg class="w-6 h-6 lg:w-7 lg:h-7 text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"/>
+              </svg>
+            </div>
+            <h3 class="text-[18px] lg:text-[20px] font-bold text-navy mb-2">Community Events</h3>
+            <p class="text-[14px] lg:text-[15px] text-muted leading-relaxed">
+              Regular talks, lectures, and special celebrations throughout the year
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Call to Action -->
+      <section class="bg-gradient-to-br from-teal to-teal/90 rounded-[24px] lg:rounded-[32px] p-8 lg:p-12 text-center text-white">
+        <h2 class="text-[26px] lg:text-[32px] font-bold mb-3 lg:mb-4">Visit Us</h2>
+        
+        <div class="flex flex-wrap items-center justify-center gap-3 lg:gap-4">
+          <a
+            href="/contact"
+            class="inline-flex items-center gap-2 bg-white text-teal px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl font-bold text-[15px] lg:text-[16px] hover:bg-white/95 transition-all hover:gap-3"
+          >
+            Contact Us
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </a>
+          <a
+            href="/salah-times"
+            class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl font-bold text-[15px] lg:text-[16px] hover:bg-white/20 transition-all"
+          >
+            Prayer Times
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+</Base>

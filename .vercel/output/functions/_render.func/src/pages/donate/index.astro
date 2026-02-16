@@ -1,0 +1,128 @@
+---
+import Base from '../../layouts/Base.astro';
+import DonationForm from '../../components/blocks/DonationForm.astro';
+import CampaignCard from '../../components/CampaignCard.astro';
+import { getDonateSettings, getDonationFunds, getCampaigns } from '../../lib/payload';
+import type { DonateSettings, DonationFund, Campaign } from '../../lib/payload';
+import { getTodayPrayerTimes } from '../../lib/prayer-times';
+import type { PrayerTimesData } from '../../lib/prayer-times';
+
+const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
+const TENANT_ID = import.meta.env.TENANT_ID || '';
+
+// Fetch data in parallel
+const [donateSettings, funds, campaigns, prayerData, stripeRes] = await Promise.all([
+  getDonateSettings().catch(() => null as DonateSettings | null),
+  getDonationFunds().catch(() => [] as DonationFund[]),
+  getCampaigns({ active: true }).catch(() => [] as Campaign[]),
+  getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
+  fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
+    .then(r => r.json())
+    .catch(() => ({ publishableKey: '' })),
+]);
+
+const publishableKey = stripeRes?.publishableKey ?? '';
+
+// Build the block props from DonateSettings + funds
+const heading = donateSettings?.heading ?? 'Support Your Masjid';
+const description = donateSettings?.description ?? '';
+const amounts = donateSettings?.amounts ?? [
+  { value: 10 }, { value: 20 }, { value: 30 },
+  { value: 50 }, { value: 75 }, { value: 100 },
+];
+const frequencies = donateSettings?.frequencies ?? [
+  { label: 'One-off', value: 'one-off' },
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Yearly', value: 'yearly' },
+];
+---
+
+<Base title="Donate" prayerData={prayerData}>
+  <div class="max-w-[1440px] mx-auto py-8 sm:py-12">
+    {/* Donation Options Section */}
+    <section class="max-w-[1200px] mx-auto px-5 md:px-10 mb-12">
+      <h2 class="text-navy text-[28px] font-bold mb-6">Donation Options</h2>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {/* General Donation Card - Always first */}
+        <CampaignCard isGeneral={true} />
+
+        {/* Campaign Cards */}
+        {campaigns.map(campaign => (
+          <CampaignCard campaign={campaign} />
+        ))}
+      </div>
+    </section>
+
+    {/* General Donation Form */}
+    <div id="donation-form" class="max-w-[1200px] mx-auto px-5 md:px-10 scroll-mt-8">
+      <DonationForm
+        block={{
+          heading,
+          description,
+          funds,
+          amounts,
+          frequencies,
+          style: 'card',
+          publishableKey,
+        }}
+      />
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Pre-select amount, frequency, and fund from URL params (passed by DonateBar)
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const amount = params.get('amount');
+    const frequency = params.get('frequency');
+    const fund = params.get('fund');
+
+    if (amount) {
+      const amountNum = Number(amount);
+      const amountBtn = document.querySelector<HTMLButtonElement>(`.df-amount[data-amount="${amountNum}"]`);
+      if (amountBtn) {
+        amountBtn.click();
+      } else {
+        // Trigger custom amount
+        const customBtn = document.querySelector<HTMLButtonElement>('.df-amount[data-amount="custom"]');
+        if (customBtn) {
+          customBtn.click();
+          const customInput = document.querySelector<HTMLInputElement>('.df-custom-input');
+          if (customInput) {
+            customInput.value = amount;
+            customInput.dispatchEvent(new Event('input'));
+          }
+        }
+      }
+    }
+
+    if (frequency) {
+      const freqBtn = document.querySelector<HTMLButtonElement>(`.df-freq[data-freq="${frequency}"]`);
+      if (freqBtn) freqBtn.click();
+    }
+
+    if (fund) {
+      const fundBtn = document.querySelector<HTMLButtonElement>(`.df-fund-btn[data-fund-id="${fund}"]`);
+      if (fundBtn) fundBtn.click();
+    }
+
+    // Smooth scroll for General Donation card
+    const generalDonationLink = document.querySelector('a[href="#donation-form"]');
+    if (generalDonationLink) {
+      generalDonationLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById('donation-form');
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      });
+    }
+  });
+</script>

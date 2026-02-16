@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro';
+import HeroSlider from '../components/HeroSlider.astro';
+import DonateBar from '../components/DonateBar.astro';
+import NewsSection from '../components/NewsSection.astro';
+import PrayerTimesPanel from '../components/PrayerTimesPanel.astro';
+import QuickLinks from '../components/QuickLinks.astro';
+
+import { getHomePage, getLatestNews, getDonateSettings } from '../lib/payload';
+import type { Page, HeroSliderBlock, IconCardGridBlock, DonateSettings, News } from '../lib/payload';
+import { getTodayPrayerTimes } from '../lib/prayer-times';
+import type { PrayerTimesData } from '../lib/prayer-times';
+import { getPreviewData } from '../lib/preview-store';
+
+const isPreview = Astro.url.searchParams.has('preview');
+
+// Fetch all data in parallel
+const [homePage, newsArticles, donateSettings, prayerData] = await Promise.all([
+  isPreview
+    ? (getPreviewData('home') as Page | null ?? getHomePage().catch(() => null))
+    : getHomePage().catch(() => null),
+  getLatestNews(3).catch(() => [] as News[]),
+  getDonateSettings().catch(() => null as DonateSettings | null),
+  getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
+]);
+
+// Extract layout blocks from the home page
+const layout = homePage?.layout ?? [];
+const heroBlock = layout.find((b): b is HeroSliderBlock => b.blockType === 'hero-slider');
+const iconCardBlock = layout.find((b): b is IconCardGridBlock => b.blockType === 'icon-card-grid');
+
+// Hero slides — fall back to hardcoded if CMS is empty
+const heroSlides = heroBlock?.slides?.length
+  ? heroBlock.slides
+  : [
+      { image: '/images/hero.png', title: 'Daily Ramadan Talks', subtitle: 'After Asr & Esha', ctaLabel: 'View Schedule', ctaUrl: '#' },
+      { image: '/images/hero.png', kicker: 'EYFS & Primary Open Day', title: "Quwwat-ul-Islam Girls' School", subtitle: 'Mon 5 Jan 2026 · 9:30 – 12:30', ctaLabel: 'Register Now', ctaUrl: '#' },
+    ];
+const autoAdvance = heroBlock?.autoAdvance ?? 6;
+
+// Quick links — fall back to hardcoded
+const quickLinkCards = iconCardBlock?.cards?.length
+  ? iconCardBlock.cards
+  : [
+      { label: 'Donate Online', url: '#' },
+      { label: 'Prayer Times', url: '#' },
+      { label: 'News', url: '#' },
+      { label: 'Forms', url: '#' },
+      { label: 'Volunteering', url: '#' },
+      { label: 'Contact Us', url: '#' },
+      { label: 'Facilities', url: '#' },
+      { label: 'Our Schools', url: '#' },
+    ];
+const quickLinkColumns = iconCardBlock?.columns ?? '4';
+
+// Donate settings — fall back to defaults
+const donate: DonateSettings = donateSettings ?? {
+  amounts: [{ value: 5 }, { value: 10 }, { value: 20 }, { value: 50 }, { value: 100 }],
+  defaultAmount: 10,
+  frequencies: [
+    { label: 'One Time', value: 'once' },
+    { label: 'Monthly', value: 'monthly' },
+  ],
+  defaultFrequency: 'once',
+  heading: 'Donate',
+  ctaText: 'Donate Now',
+};
+
+// Fallback prayer data when API is unavailable
+const fallbackPrayerData: PrayerTimesData = {
+  prayers: [
+    { name: 'Fajr', begins: '6:07', jamaah: '7:00' },
+    { name: 'Sunrise', begins: '7:46', jamaah: '' },
+    { name: 'Zuhr', begins: '12:19', jamaah: '1:00' },
+    { name: 'Asr', begins: '2:52', jamaah: '3:15' },
+    { name: 'Maghrib', begins: '4:43', jamaah: '4:48' },
+    { name: 'Isha', begins: '6:21', jamaah: '7:30' },
+  ],
+  nextPrayer: { name: 'Isha', jamaah: '7:30' },
+  date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+  hijriDate: '',
+  isRamadan: false,
+};
+
+const prayers = prayerData ?? fallbackPrayerData;
+---
+
+<Base title="Home" prayerData={prayers}>
+  <!-- ===== HERO BANNER ===== -->
+  <HeroSlider slides={heroSlides} autoAdvance={autoAdvance} />
+
+  <!-- ===== CONTAINED CONTENT ===== -->
+  <div class="max-w-[1440px] mx-auto">
+
+    <!-- ===== DONATE BAR ===== -->
+    <DonateBar donate={donate} />
+
+    <!-- ===== NEWS + PRAYER TIMES ===== -->
+    <section class="px-5 md:px-10 mt-8 lg:mt-10 flex flex-col lg:flex-row gap-6">
+      <NewsSection articles={newsArticles} />
+      <PrayerTimesPanel prayerData={prayers} />
+    </section>
+
+    <!-- ===== QUICK LINKS ===== -->
+    <QuickLinks cards={quickLinkCards} columns={quickLinkColumns} />
+  </div>
+</Base>
