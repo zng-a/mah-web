@@ -1,7 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { initRuntimeEnv } from '../../lib/runtime-env';
 import { getDonateSettings } from '../../lib/payload';
 import type { DonateSettings } from '../../lib/payload';
+
+initRuntimeEnv(Astro);
 
 let donateSettings: DonateSettings | null = null;
 try {

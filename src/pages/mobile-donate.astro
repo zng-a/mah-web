@@ -1,12 +1,14 @@
 ---
 import '../styles/global.css';
 import DonationForm from '../components/blocks/DonationForm.astro';
-import { getDonateSettings } from '../lib/payload';
+import { initRuntimeEnv } from '../lib/runtime-env';
+import { getDonateSettings, getRuntimeConfig } from '../lib/payload';
+
+initRuntimeEnv(Astro);
 
 const donateSettings = await getDonateSettings();
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
 
 const stripeRes = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
   .then(r => r.json())

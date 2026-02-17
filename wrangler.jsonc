@@ -1,5 +1,21 @@
 {
   "name": "mah-web",
+  "main": "dist/_worker.js",
   "compatibility_date": "2026-01-28",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "PAYLOAD_URL": "https://masjidco-cms.vercel.app",
+    "TENANT_ID": "698365970695a7eb198f40f9",
+    "PRAYER_API_URL": "https://masjidco.vercel.app/api/mosque/e796fe6e-14e5-41ef-88af-f8250ddb4ed1/prayer-times"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "a0360b9d214b4989a254b68007540c46"
+    }
+  ]
 }

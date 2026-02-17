@@ -1,7 +1,23 @@
 // Payload CMS API client
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+// For Cloudflare Workers, we need to access runtime env vars
+// Don't initialize from import.meta.env to avoid build-time values being baked in
+let PAYLOAD_URL = '';
+let TENANT_ID = '';
+
+// Runtime config setter for Cloudflare Workers
+export function setRuntimeConfig(config: { PAYLOAD_URL?: string; TENANT_ID?: string }) {
+  if (config.PAYLOAD_URL) PAYLOAD_URL = config.PAYLOAD_URL;
+  if (config.TENANT_ID) TENANT_ID = config.TENANT_ID;
+}
+
+// Get current config values with fallbacks for local dev
+export function getRuntimeConfig() {
+  return {
+    PAYLOAD_URL: PAYLOAD_URL || import.meta.env.PAYLOAD_URL || 'http://localhost:3000',
+    TENANT_ID: TENANT_ID || import.meta.env.TENANT_ID || ''
+  };
+}
 
 // ----- Shared types (mirrors payload-types.ts shapes) -----
 
@@ -203,7 +219,8 @@ export interface Announcement {
 // ----- API helpers -----
 
 async function payloadFetch<T>(path: string): Promise<T> {
-  const url = `${PAYLOAD_URL}/api${path}`;
+  const config = getRuntimeConfig();
+  const url = `${config.PAYLOAD_URL}/api${path}`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Payload API error: ${res.status} ${res.statusText} – ${url}`);
@@ -217,7 +234,8 @@ export async function getGlobal<T>(slug: string): Promise<T> {
 
 export async function getCollection<T>(slug: string, query = ''): Promise<{ docs: T[]; totalDocs: number }> {
   // Automatically scope every collection query to the configured tenant
-  const tenantFilter = TENANT_ID ? `where[tenant][equals]=${TENANT_ID}` : '';
+  const config = getRuntimeConfig();
+  const tenantFilter = config.TENANT_ID ? `where[tenant][equals]=${config.TENANT_ID}` : '';
   const parts = [query, tenantFilter].filter(Boolean).join('&');
   const qs = parts ? `?${parts}` : '';
   return payloadFetch<{ docs: T[]; totalDocs: number }>(`/${slug}${qs}`);
@@ -352,9 +370,15 @@ export function mediaUrl(media: string | Media | null | undefined, size?: 'thumb
     url = media.url ?? '';
   }
 
+  const config = getRuntimeConfig();
+
+  // Fix localhost URLs from CMS (when CMS has wrong PAYLOAD_URL configured)
+  if (url && url.includes('localhost:3000')) {
+    url = url.replace('http://localhost:3000', config.PAYLOAD_URL);
+  }
   // Payload returns relative paths for local storage — make them absolute
-  if (url && url.startsWith('/')) {
-    url = `${PAYLOAD_URL}${url}`;
+  else if (url && url.startsWith('/')) {
+    url = `${config.PAYLOAD_URL}${url}`;
   }
 
   return url;

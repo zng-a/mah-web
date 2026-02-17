@@ -1,9 +1,11 @@
 ---
 import '../styles/global.css';
-import { mediaUrl } from '../lib/payload';
+import { initRuntimeEnv } from '../lib/runtime-env';
+import { mediaUrl, getRuntimeConfig } from '../lib/payload';
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+initRuntimeEnv(Astro);
+
+const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
 
 interface NewsItem {
   id: string;

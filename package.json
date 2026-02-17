@@ -4,12 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && cp .assetsignore dist/.assetsignore",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy": "npm run build && npx wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/vercel": "^9.0.4",
+    "@astrojs/cloudflare": "^12.6.12",
     "@payloadcms/live-preview": "^3.76.0",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.15",

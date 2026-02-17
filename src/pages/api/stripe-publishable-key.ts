@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+export const GET: APIRoute = async ({ locals }) => {
+  const PAYLOAD_URL = locals.runtime?.env?.PAYLOAD_URL || import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
+  const TENANT_ID = locals.runtime?.env?.TENANT_ID || import.meta.env.TENANT_ID || '';
 
-export const GET: APIRoute = async () => {
   try {
     const res = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`);
     const data = await res.json();

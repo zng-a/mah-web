@@ -1,16 +1,18 @@
 ---
 import Base from '../../layouts/Base.astro';
 import DonationForm from '../../components/blocks/DonationForm.astro';
-import { getCampaignBySlug } from '../../lib/payload';
+import { initRuntimeEnv } from '../../lib/runtime-env';
+import { getCampaignBySlug, getRuntimeConfig } from '../../lib/payload';
 import { lexicalToHtml } from '../../lib/lexical';
+
+initRuntimeEnv(Astro);
 
 const campaign = await getCampaignBySlug('ramadan-giving');
 if (!campaign || !campaign.active) {
   return Astro.redirect('/donate');
 }
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
 
 const stripeRes = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
   .then(r => r.json())

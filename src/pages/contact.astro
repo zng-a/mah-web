@@ -1,6 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getFooter, getSiteSettings } from '../lib/payload';
+import { initRuntimeEnv } from '../lib/runtime-env';
+
+initRuntimeEnv(Astro);
 
 const footer = await getFooter();
 const siteSettings = await getSiteSettings();

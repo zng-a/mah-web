@@ -7,6 +7,10 @@ import type { Page, DonateSettings } from '../lib/payload';
 import { getTodayPrayerTimes } from '../lib/prayer-times';
 import type { PrayerTimesData } from '../lib/prayer-times';
 import { getPreviewData } from '../lib/preview-store';
+import { initRuntimeEnv } from '../lib/runtime-env';
+
+// Initialize runtime environment for Cloudflare Workers
+initRuntimeEnv(Astro);
 
 const { slug } = Astro.params;
 const pageSlug = slug || 'home';

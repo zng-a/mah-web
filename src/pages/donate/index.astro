@@ -2,13 +2,15 @@
 import Base from '../../layouts/Base.astro';
 import DonationForm from '../../components/blocks/DonationForm.astro';
 import CampaignCard from '../../components/CampaignCard.astro';
-import { getDonateSettings, getDonationFunds, getCampaigns } from '../../lib/payload';
+import { getDonateSettings, getDonationFunds, getCampaigns, getRuntimeConfig } from '../../lib/payload';
 import type { DonateSettings, DonationFund, Campaign } from '../../lib/payload';
 import { getTodayPrayerTimes } from '../../lib/prayer-times';
 import type { PrayerTimesData } from '../../lib/prayer-times';
+import { initRuntimeEnv } from '../../lib/runtime-env';
 
-const PAYLOAD_URL = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
-const TENANT_ID = import.meta.env.TENANT_ID || '';
+initRuntimeEnv(Astro);
+
+const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
 
 // Fetch data in parallel
 const [donateSettings, funds, campaigns, prayerData, stripeRes] = await Promise.all([
