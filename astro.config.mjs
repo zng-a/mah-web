@@ -11,6 +11,9 @@ export default defineConfig({
     imageService: 'compile'
   }),
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    build: {
+      cssCodeSplit: false,
+    },
   }
 });
