@@ -33,6 +33,7 @@ export interface PrayerTimesData {
   date: string;        // e.g. "15 January 2026"
   hijriDate: string;   // as returned by the API
   isRamadan: boolean;
+  isTomorrow: boolean; // true when all today's prayers have passed
 }
 
 /** Convert "HH:MM:SS" or "HH:MM" to display format "H:MM" */
@@ -110,12 +111,40 @@ export async function getTodayPrayerTimes(): Promise<PrayerTimesData | null> {
       }
     }
 
+    // All today's prayers have passed — show tomorrow's timetable
+    if (!nextPrayer) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDate = tomorrow.toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+      const tomorrowData = allDays.find((d) => d.d_date === tomorrowDate);
+
+      if (tomorrowData) {
+        const tomorrowPrayers: Prayer[] = [
+          { name: 'Fajr', begins: formatTime(tomorrowData.fajr_begins), jamaah: formatTime(tomorrowData.fajr_jamah) },
+          { name: 'Sunrise', begins: formatTime(tomorrowData.sunrise), jamaah: '' },
+          { name: 'Zuhr', begins: formatTime(tomorrowData.zuhr_begins), jamaah: formatTime(tomorrowData.zuhr_jamah) },
+          { name: 'Asr', begins: formatTime(tomorrowData.asr_mithl_1), jamaah: formatTime(tomorrowData.asr_jamah) },
+          { name: 'Maghrib', begins: formatTime(tomorrowData.maghrib_begins), jamaah: formatTime(tomorrowData.maghrib_jamah) },
+          { name: 'Isha', begins: formatTime(tomorrowData.isha_begins), jamaah: formatTime(tomorrowData.isha_jamah) },
+        ];
+        return {
+          prayers: tomorrowPrayers,
+          nextPrayer: { name: 'Fajr', jamaah: formatTime(tomorrowData.fajr_jamah) },
+          date: formatDate(tomorrowData.d_date),
+          hijriDate: tomorrowData.hijri_date ?? '',
+          isRamadan: tomorrowData.is_ramadan === 1,
+          isTomorrow: true,
+        };
+      }
+    }
+
     return {
       prayers,
       nextPrayer,
       date: formatDate(today.d_date),
       hijriDate: today.hijri_date ?? '',
       isRamadan: today.is_ramadan === 1,
+      isTomorrow: false,
     };
   } catch {
     return null;

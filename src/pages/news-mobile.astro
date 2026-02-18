@@ -37,49 +37,58 @@ function formatDate(dateStr: string): string {
 }
 ---
 
-<html lang="en">
+<html lang="en" style="background: #0A1C30">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0A1C30" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
     <title>News - Masjid Al-Hikmah</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         font-family: 'Satoshi', -apple-system, system-ui, sans-serif;
-        background: #f5f5f5;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
+      .pwa-header {
+        background: #0A1C30;
+        padding-top: max(env(safe-area-inset-top) + 12px, 20px);
+        padding-bottom: 14px;
+        padding-left: 20px;
+        padding-right: 20px;
+        text-align: center;
+      }
     </style>
   </head>
-  <body>
+  <body style="background: #0A1C30">
     <!-- Header -->
-    <header style="background: #0A1C30; padding: 40px 20px 30px; text-align: center;">
+    <header class="pwa-header">
       <img
         src="/images/logo-white.png"
         alt="Masjid Al-Hikmah"
-        style="width: 150px; height: auto; margin: 0 auto;"
+        style="width: 145px; height: auto; margin: 0 auto;"
       />
     </header>
 
     <!-- Navigation Tabs -->
     <nav style="display: flex; background: #0A1C30; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-      <a href="/mobile" style="flex: 1; padding: 18px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 18px; text-decoration: none; border-bottom: 3px solid transparent;">
+      <a href="/mobile" style="flex: 1; padding: 12px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 16px; text-decoration: none; border-bottom: 3px solid transparent;">
         Salah
       </a>
-      <a href="/mobile-donate" style="flex: 1; padding: 18px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 18px; text-decoration: none; border-bottom: 3px solid transparent;">
+      <a href="/mobile-donate" style="flex: 1; padding: 12px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 16px; text-decoration: none; border-bottom: 3px solid transparent;">
         Donate
       </a>
-      <a href="/news-mobile" style="flex: 1; padding: 18px; text-align: center; color: white; font-weight: 700; font-size: 18px; text-decoration: none; background: rgba(255,255,255,0.15); border-bottom: 3px solid white;">
+      <a href="/news-mobile" style="flex: 1; padding: 12px; text-align: center; color: white; font-weight: 700; font-size: 16px; text-decoration: none; background: rgba(255,255,255,0.15); border-bottom: 3px solid white;">
         News
       </a>
     </nav>
 
     <!-- Content -->
-    <main style="padding: 20px; max-width: 600px; margin: 0 auto;">
+    <main style="padding: 20px; max-width: 600px; margin: 0 auto; background: #f5f5f5; min-height: 100vh;">
       {newsItems.length > 0 ? (
         <div style="display: flex; flex-direction: column; gap: 16px;">
           {newsItems.map((item) => {

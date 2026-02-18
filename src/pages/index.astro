@@ -33,13 +33,7 @@ const layout = homePage?.layout ?? [];
 const heroBlock = layout.find((b): b is HeroSliderBlock => b.blockType === 'hero-slider');
 const iconCardBlock = layout.find((b): b is IconCardGridBlock => b.blockType === 'icon-card-grid');
 
-// Hero slides — fall back to hardcoded if CMS is empty
-const heroSlides = heroBlock?.slides?.length
-  ? heroBlock.slides
-  : [
-      { image: '/images/hero.png', title: 'Daily Ramadan Talks', subtitle: 'After Asr & Esha', ctaLabel: 'View Schedule', ctaUrl: '#' },
-      { image: '/images/hero.png', kicker: 'EYFS & Primary Open Day', title: "Quwwat-ul-Islam Girls' School", subtitle: 'Mon 5 Jan 2026 · 9:30 – 12:30', ctaLabel: 'Register Now', ctaUrl: '#' },
-    ];
+const heroSlides = heroBlock?.slides ?? [];
 const autoAdvance = heroBlock?.autoAdvance ?? 6;
 
 // Quick links — fall back to hardcoded

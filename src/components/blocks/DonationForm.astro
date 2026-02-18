@@ -51,7 +51,7 @@ const defaultFund = funds[0] ?? null;
 const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? v;
 ---
 
-<section class={style === 'full' ? 'py-12 sm:py-16 px-5 md:px-10 bg-light-bg' : 'py-12 sm:py-16 px-5 md:px-10'}>
+<section class={style === 'full' ? 'pt-4 pb-12 sm:py-16 sm:px-5 md:px-10 bg-light-bg' : 'pt-4 pb-12 sm:py-16 sm:px-5 md:px-10'}>
   <div class="max-w-[580px] mx-auto">
     <div
       class={`donation-form ${style === 'card' ? 'bg-white rounded-[28px] shadow-[0_4px_40px_rgba(15,36,62,0.08)] overflow-hidden' : ''}`}
@@ -66,9 +66,10 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       data-ramadan-start-date={block.ramadanStartDate ?? ''}
       data-total-installments={block.totalInstallments ?? ''}
       data-campaign-quantity="1"
+      data-form-heading={heading}
     >
       <!-- ═══ Header ═══ -->
-      <div class="bg-navy px-6 sm:px-8 pt-7 pb-6 text-center">
+      <div class="bg-navy px-4 sm:px-8 pt-7 pb-6 text-center">
         <h2 class="text-white text-[26px] sm:text-[32px] font-bold tracking-[-0.01em] mb-1">{heading}</h2>
         {description ? (
           <p class="text-white/60 text-[14px] sm:text-[15px] leading-[1.65] max-w-[400px] mx-auto">{description}</p>
@@ -77,7 +78,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         )}
       </div>
 
-      <div class="px-6 sm:px-8 pt-6 pb-8">
+      <form autocomplete="on" onsubmit="return false" class="px-4 sm:px-8 pt-6 pb-8">
         <!-- ═══ Fund Selector ═══ -->
         {!block.hideFundSelector && funds.length > 1 && (
           <div class="mb-6">
@@ -145,7 +146,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         {!block.hideFrequencySelector && (
         <div class="mb-6">
           <label class="df-label">Frequency</label>
-          <div class="grid grid-cols-5 gap-[6px] df-freq-grid">
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-[6px] df-freq-grid">
             {frequencies.map((freq) => (
               <button
                 type="button"
@@ -304,7 +305,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
             <span>Powered by Stripe</span>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </section>
@@ -329,7 +330,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
     border: 1.5px solid rgba(15, 36, 62, 0.15);
     border-radius: 12px;
     font-family: inherit;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
     color: var(--color-navy);
     outline: none;
@@ -363,6 +364,22 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
   .df-giftaid-fields.is-open {
     max-height: 500px;
     opacity: 1;
+  }
+
+  /* Explicit button color declarations — unlayered so they win over @layer utilities
+     in PWA/standalone contexts where cascade layer resolution may differ */
+  :global(.df-cta-btn) {
+    background-color: #44839e;
+    color: #ffffff;
+  }
+  :global(.df-amount.bg-teal),
+  :global(.df-freq.bg-teal) {
+    background-color: #44839e;
+    color: #ffffff;
+  }
+  :global(.df-fund-btn.bg-navy) {
+    background-color: #0f243e;
+    color: #ffffff;
   }
 </style>
 
@@ -795,7 +812,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         }
 
         if (!stripe || !elements) {
-          showError('Payment system is still loading. Please try again in a moment.');
+          showError('Payment system is loading. Please try again in a moment.');
           return;
         }
 
@@ -809,6 +826,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           donorEmail: emailInput?.value?.trim(),
           coversFees: coverFees,
           giftAid,
+          formSource: form.dataset.formHeading || undefined,
           campaignId: form.dataset.campaignId || undefined,
           campaignType: form.dataset.campaignType || undefined,
           quantity: form.dataset.campaignQuantity ? parseInt(form.dataset.campaignQuantity) : undefined,

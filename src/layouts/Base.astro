@@ -28,8 +28,8 @@ try {
 }
 
 const pageTitle = title
-  ? `${title} | ${siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'}`
-  : siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society';
+  ? `${title}${siteSettings?.siteTitle ? ` | ${siteSettings.siteTitle}` : ''}`
+  : siteSettings?.siteTitle ?? '';
 
 const logoUrl = header?.logo ? mediaUrl(header.logo) : '/images/logo.png';
 const footerLogoUrl = footer?.logo ? mediaUrl(footer.logo) : '/images/logo.png';
@@ -57,6 +57,10 @@ function isLinkActive(linkHref: string): boolean {
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {siteSettings?.defaultMetaDescription && <meta name="description" content={siteSettings.defaultMetaDescription} />}
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
@@ -107,7 +111,7 @@ function isLinkActive(linkHref: string): boolean {
     <header class="flex items-start justify-between px-5 md:px-10 pt-4 pb-2">
       <div class="shrink-0 z-20">
         <a href="/">
-          <img src={logoUrl} alt={siteSettings?.siteTitle ?? 'Quwwat-ul-Islam Society'} class="w-[110px] md:w-[150px] h-auto" />
+          <img src={logoUrl} alt={siteSettings?.siteTitle ?? ''} class="w-[110px] md:w-[150px] h-auto" />
         </a>
       </div>
       {prayerData && (
@@ -375,7 +379,7 @@ function isLinkActive(linkHref: string): boolean {
 
       <div class="bg-navy text-white py-4 lg:py-5">
         <div class="max-w-[1440px] mx-auto px-5 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-2 text-[13px] lg:text-[14px]">
-          <span class="text-white/70">{footer?.copyright ?? '\u00A9 2026 Quwwat-ul-Islam Society. All rights reserved.'}</span>
+          {footer?.copyright && <span class="text-white/70">{footer.copyright}</span>}
           {footer?.charityNumber && (
             <span class="text-white/50 text-[12px]">Registered Charity No. {footer.charityNumber}</span>
           )}
