@@ -4,14 +4,15 @@ import type { Campaign } from '../lib/payload'
 interface Props {
   campaign?: Campaign
   isGeneral?: boolean
+  basePath?: string
 }
 
-const { campaign, isGeneral = false } = Astro.props
+const { campaign, isGeneral = false, basePath = '/donate' } = Astro.props
 const progress = campaign?.goalAmount
   ? Math.min(100, (campaign.currentAmount / campaign.goalAmount) * 100)
   : 0
 
-const href = isGeneral ? '#donation-form' : `/donate/${campaign?.slug}`
+const href = isGeneral ? '#donation-form' : `${basePath}/${campaign?.slug}`
 ---
 
 <a

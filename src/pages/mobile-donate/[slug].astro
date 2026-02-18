@@ -1,0 +1,261 @@
+---
+import '../../styles/global.css';
+import DonationForm from '../../components/blocks/DonationForm.astro';
+import { initRuntimeEnv } from '../../lib/runtime-env';
+import { getCampaignBySlug, getRuntimeConfig } from '../../lib/payload';
+import { lexicalToHtml } from '../../lib/lexical';
+
+initRuntimeEnv(Astro);
+
+const { slug } = Astro.params;
+
+const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
+
+const [campaign, stripeRes] = await Promise.all([
+  getCampaignBySlug(slug!),
+  fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
+    .then(r => r.json())
+    .catch(() => ({ publishableKey: '' })),
+]);
+
+if (!campaign || !campaign.active) {
+  return Astro.redirect('/mobile-donate');
+}
+
+const publishableKey = stripeRes?.publishableKey ?? '';
+const descriptionHtml = campaign.description ? lexicalToHtml(campaign.description) : '';
+
+// fixed-unit
+const pricePerUnit = campaign.fixedUnitConfig?.pricePerUnit ?? 20;
+const maxQuantity = campaign.fixedUnitConfig?.maxQuantity ?? 100;
+
+// fixed-installments
+const totalAmount = campaign.installmentsConfig?.totalAmount ?? 1000;
+const installments = campaign.installmentsConfig?.numberOfInstallments ?? 12;
+const perMonth = Math.round((totalAmount / installments) * 100) / 100;
+
+// ramadan-nightly
+const ramadanStart = new Date(campaign.ramadanConfig?.ramadanStartDate || '');
+const ramadanEnd = new Date(campaign.ramadanConfig?.ramadanEndDate || '');
+const today = new Date();
+const daysSinceStart = Math.floor((today.getTime() - ramadanStart.getTime()) / (1000 * 60 * 60 * 24));
+const currentDay = Math.max(1, Math.min(30, daysSinceStart + 1));
+const daysUntilEnd = Math.ceil((ramadanEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+const remainingNights = Math.max(0, Math.min(30, daysUntilEnd));
+---
+
+<html lang="en" style="background: #0A1C30">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0A1C30" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <title>{campaign.name} - Donate</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: 'Satoshi', -apple-system, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .pwa-header {
+        background: #0A1C30;
+        padding-top: max(env(safe-area-inset-top) + 12px, 20px);
+        padding-bottom: 14px;
+        padding-left: 20px;
+        padding-right: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body style="background: #0A1C30">
+    <!-- Header -->
+    <header class="pwa-header">
+      <img
+        src="/images/logo-white.png"
+        alt="Masjid Al-Hikmah"
+        style="width: 145px; height: auto; margin: 0 auto;"
+      />
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav style="display: flex; background: #0A1C30; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+      <a href="/mobile" style="flex: 1; padding: 12px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 16px; text-decoration: none; border-bottom: 3px solid transparent;">
+        Salah
+      </a>
+      <a href="/mobile-donate" style="flex: 1; padding: 12px; text-align: center; color: white; font-weight: 700; font-size: 16px; text-decoration: none; background: rgba(255,255,255,0.15); border-bottom: 3px solid white;">
+        Donate
+      </a>
+      <a href="/news-mobile" style="flex: 1; padding: 12px; text-align: center; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 16px; text-decoration: none; border-bottom: 3px solid transparent;">
+        News
+      </a>
+    </nav>
+
+    <!-- Content -->
+    <main style="padding: 0 16px; max-width: 600px; margin: 0 auto; background: #f5f5f5; min-height: 100vh;">
+
+      <!-- Back -->
+      <div style="padding-top: 24px; padding-bottom: 8px;">
+        <a href="/mobile-donate" style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: rgba(15,36,62,0.5); text-decoration: none;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Back
+        </a>
+      </div>
+
+      {campaign.type === 'fixed-unit' && (
+        <DonationForm
+          block={{
+            heading: campaign.name,
+            description: `£${pricePerUnit} per ${campaign.fixedUnitConfig?.unitName ?? 'unit'}`,
+            funds: campaign.fund ? [campaign.fund] : [],
+            amounts: [{ value: pricePerUnit }],
+            frequencies: [{ label: 'One-off', value: 'one-off' }],
+            style: 'card',
+            publishableKey,
+            campaign,
+            campaignType: 'fixed-unit',
+            hideFundSelector: true,
+            hideFrequencySelector: true,
+          }}
+        />
+      )}
+
+      {campaign.type === 'fixed-installments' && (
+        <DonationForm
+          block={{
+            heading: campaign.name,
+            description: `${installments} monthly contributions of £${perMonth}`,
+            funds: campaign.fund ? [campaign.fund] : [],
+            amounts: [{ value: perMonth }],
+            frequencies: [{ label: 'Monthly', value: 'monthly' }],
+            style: 'card',
+            publishableKey,
+            campaign,
+            campaignType: 'fixed-installments',
+            totalInstallments: installments,
+            hideAmountSelector: true,
+            hideFrequencySelector: true,
+            hideFundSelector: true,
+          }}
+        />
+      )}
+
+      {campaign.type === 'ramadan-nightly' && (
+        <DonationForm
+          block={{
+            heading: `Give for ${remainingNights} Nights`,
+            description: `Charged at 2 AM nightly, starting tonight`,
+            funds: campaign.fund ? [campaign.fund] : [],
+            amounts: [2, 5, 10, 15, 20].map(v => ({ value: v })),
+            frequencies: [{ label: `Daily (${remainingNights} nights)`, value: 'daily' }],
+            style: 'card',
+            publishableKey,
+            campaign,
+            campaignType: 'ramadan-nightly',
+            ramadanStartDate: campaign.ramadanConfig?.ramadanStartDate,
+            paymentMethods: ['card'],
+            hideFrequencySelector: true,
+            hideFundSelector: true,
+          }}
+        />
+      )}
+
+    </main>
+  </body>
+</html>
+
+{campaign.type === 'fixed-unit' && (
+  <script define:vars={{ pricePerUnit, maxQuantity }}>
+    document.addEventListener('DOMContentLoaded', () => {
+      const donationForm = document.querySelector('.donation-form');
+      if (!donationForm) return;
+      const amountGrid = donationForm.querySelector('.df-amount-grid');
+      if (!amountGrid) return;
+
+      const btnBase = 'font-family:inherit; font-weight:700; border:none; cursor:pointer; transition: background 0.15s; border-radius:14px; height:52px; width:100%;';
+      const btnActive = `${btnBase} background:#44839e; color:#fff; box-shadow:0 2px 12px rgba(68,131,158,0.3);`;
+      const btnInactive = `${btnBase} background:rgba(15,36,62,0.04); color:#0f243e;`;
+
+      const brickSelector = `
+        <div style="margin-bottom:12px;">
+          <label style="display:block; font-size:13px; font-weight:700; color:rgba(15,36,62,0.45); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;">Quantity</label>
+          <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:12px;">
+            ${[1, 5, 10, 25].map((qty, idx) => `
+              <button type="button" data-brick-qty="${qty}"
+                class="brick-qty-btn"
+                style="${idx === 0 ? btnActive : btnInactive} font-size:17px;">
+                ${qty}
+              </button>
+            `).join('')}
+            <button type="button" data-brick-qty="custom"
+              class="brick-qty-btn"
+              style="${btnInactive} font-size:15px;">
+              Custom
+            </button>
+          </div>
+          <div id="brick-custom-row" style="display:none;">
+            <input type="number" min="1" max="${maxQuantity}" value="1" id="brick-quantity"
+              style="width:100%; height:52px; padding:0 16px; border-radius:14px; background:rgba(15,36,62,0.04); border:2px solid transparent; font-family:inherit; font-weight:700; font-size:18px; color:#0f243e; outline:none; margin-bottom:12px; box-sizing:border-box;"
+              placeholder="Enter quantity" />
+          </div>
+          <p style="font-size:14px; color:rgba(15,36,62,0.6);">£${pricePerUnit} each &bull; Total: <span id="brick-total" style="font-weight:700; color:#44839e;">£${pricePerUnit}</span></p>
+        </div>
+      `;
+
+      const parentDiv = amountGrid.parentElement;
+      if (parentDiv) parentDiv.innerHTML = brickSelector;
+
+      setTimeout(() => {
+        const brickButtons = donationForm.querySelectorAll('.brick-qty-btn');
+        const quantityInput = document.getElementById('brick-quantity');
+        const customRow = document.getElementById('brick-custom-row');
+        const totalDisplay = document.getElementById('brick-total');
+
+        function updateBrickAmount(quantity) {
+          const amount = quantity * pricePerUnit;
+          if (totalDisplay) totalDisplay.textContent = `£${amount}`;
+          brickButtons.forEach(btn => {
+            const isActive = btn.dataset.brickQty == quantity || (btn.dataset.brickQty === 'custom' && customRow?.style.display !== 'none');
+            const fontSize = btn.dataset.brickQty === 'custom' ? '15px' : '17px';
+            if (isActive) {
+              btn.style.cssText = `${btnActive} font-size:${fontSize};`;
+            } else {
+              btn.style.cssText = `${btnInactive} font-size:${fontSize};`;
+            }
+          });
+          donationForm.setAttribute('data-campaign-quantity', quantity.toString());
+          donationForm.dispatchEvent(new CustomEvent('campaign-amount-update', { detail: { amount, quantity }, bubbles: true }));
+        }
+
+        brickButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const qtyValue = btn.dataset.brickQty;
+            if (qtyValue === 'custom') {
+              if (customRow) customRow.style.display = '';
+              setTimeout(() => quantityInput?.focus(), 50);
+              updateBrickAmount(parseInt(quantityInput?.value || '1'));
+            } else {
+              if (customRow) customRow.style.display = 'none';
+              const qty = parseInt(qtyValue);
+              if (quantityInput) quantityInput.value = qty.toString();
+              updateBrickAmount(qty);
+            }
+          });
+        });
+
+        if (quantityInput) {
+          quantityInput.addEventListener('input', () => {
+            updateBrickAmount(Math.max(1, parseInt(quantityInput.value) || 1));
+          });
+        }
+
+        updateBrickAmount(1);
+      }, 100);
+    });
+  </script>
+)}

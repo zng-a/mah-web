@@ -95,7 +95,7 @@ function formatDate(dateStr: string): string {
             const imgSrc = item.featuredImage ? mediaUrl(item.featuredImage, 'card') : null;
             return (
               <a
-                href={`/news/${item.slug}`}
+                href={`/news-mobile/${item.slug}`}
                 style="display: block; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;"
                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)'"
                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'"

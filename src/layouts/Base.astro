@@ -63,6 +63,7 @@ function isLinkActive(linkHref: string): boolean {
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {siteSettings?.defaultMetaDescription && <meta name="description" content={siteSettings.defaultMetaDescription} />}
+    {logoUrl && <link rel="preload" as="image" href={logoUrl} fetchpriority="high" />}
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
     <title>{pageTitle}</title>
     <style define:vars={{ themeColor }}>
@@ -111,7 +112,7 @@ function isLinkActive(linkHref: string): boolean {
     <header class="flex items-start justify-between px-5 md:px-10 pt-4 pb-2">
       <div class="shrink-0 z-20">
         <a href="/">
-          <img src={logoUrl} alt={siteSettings?.siteTitle ?? ''} class="w-[110px] md:w-[150px] h-auto" />
+          <img src={logoUrl} alt={siteSettings?.siteTitle ?? ''} class="w-[110px] md:w-[150px] h-auto" width="150" height="50" fetchpriority="high" />
         </a>
       </div>
       {prayerData && (

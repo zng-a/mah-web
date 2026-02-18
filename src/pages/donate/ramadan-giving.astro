@@ -106,6 +106,7 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
           campaign: campaign,
           campaignType: 'ramadan-nightly',
           ramadanStartDate: campaign.ramadanConfig?.ramadanStartDate,
+          paymentMethods: ['card'],
           hideFrequencySelector: true,
           hideFundSelector: true,
         }}

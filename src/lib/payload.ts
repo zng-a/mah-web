@@ -204,6 +204,7 @@ export interface News {
   slug: string;
   featuredImage: string | Media;
   excerpt?: string | null;
+  content?: unknown;
   publishedDate: string;
   featured?: boolean | null;
   status?: string | null;
@@ -315,6 +316,14 @@ export async function getServices(limit = 20): Promise<Service[]> {
 export async function getTeamMembers(limit = 20): Promise<TeamMember[]> {
   const result = await getCollection<TeamMember>('team-members', `sort=order&limit=${limit}&depth=1`);
   return result.docs;
+}
+
+export async function getNewsBySlug(slug: string): Promise<News | null> {
+  const result = await getCollection<News>(
+    'news',
+    `where[slug][equals]=${slug}&where[status][equals]=published&limit=1&depth=1`,
+  );
+  return result.docs[0] ?? null;
 }
 
 export async function getLatestNews(limit = 3): Promise<News[]> {

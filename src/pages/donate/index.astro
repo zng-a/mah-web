@@ -34,7 +34,6 @@ const amounts = donateSettings?.amounts ?? [
 ];
 const frequencies = donateSettings?.frequencies ?? [
   { label: 'One-off', value: 'one-off' },
-  { label: 'Daily', value: 'daily' },
   { label: 'Weekly', value: 'weekly' },
   { label: 'Monthly', value: 'monthly' },
   { label: 'Yearly', value: 'yearly' },
@@ -68,6 +67,7 @@ const frequencies = donateSettings?.frequencies ?? [
           amounts,
           frequencies,
           style: 'card',
+          frequencyFirstFullWidth: true,
           publishableKey,
         }}
       />

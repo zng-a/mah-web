@@ -1,18 +1,22 @@
 ---
 import '../styles/global.css';
 import DonationForm from '../components/blocks/DonationForm.astro';
+import CampaignCard from '../components/CampaignCard.astro';
 import { initRuntimeEnv } from '../lib/runtime-env';
-import { getDonateSettings, getRuntimeConfig } from '../lib/payload';
+import { getDonateSettings, getCampaigns, getRuntimeConfig } from '../lib/payload';
+import type { Campaign } from '../lib/payload';
 
 initRuntimeEnv(Astro);
 
-const donateSettings = await getDonateSettings();
-
 const { PAYLOAD_URL, TENANT_ID } = getRuntimeConfig();
 
-const stripeRes = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
-  .then(r => r.json())
-  .catch(() => ({ publishableKey: '' }));
+const [donateSettings, campaigns, stripeRes] = await Promise.all([
+  getDonateSettings(),
+  getCampaigns({ active: true }).catch(() => [] as Campaign[]),
+  fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=${TENANT_ID}`)
+    .then(r => r.json())
+    .catch(() => ({ publishableKey: '' })),
+]);
 
 const publishableKey = stripeRes?.publishableKey ?? '';
 ---
@@ -69,6 +73,18 @@ const publishableKey = stripeRes?.publishableKey ?? '';
 
     <!-- Content -->
     <main style="padding: 0 16px; max-width: 600px; margin: 0 auto; background: #f5f5f5; min-height: 100vh;">
+
+      <!-- Donation Options -->
+      <div style="padding-top: 16px; padding-bottom: 4px;">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <CampaignCard isGeneral={true} />
+          {campaigns.map(campaign => (
+            <CampaignCard campaign={campaign} basePath="/mobile-donate" />
+          ))}
+        </div>
+      </div>
+
+      <div id="donation-form">
       <DonationForm
         block={{
           heading: donateSettings?.heading || 'Support Our Masjid',
@@ -80,9 +96,23 @@ const publishableKey = stripeRes?.publishableKey ?? '';
             { label: 'Monthly', value: 'monthly' }
           ],
           style: 'card',
+          frequencyFirstFullWidth: true,
           publishableKey: publishableKey,
         }}
       />
+      </div>
     </main>
   </body>
 </html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const generalCard = document.querySelector('a[href="#donation-form"]');
+    if (generalCard) {
+      generalCard.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('donation-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  });
+</script>
