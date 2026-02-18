@@ -95,7 +95,7 @@ export interface SiteSettings {
   themeColor?: string | null;
   socialLinks?:
     | {
-        platform?: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'whatsapp';
+        platform?: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'whatsapp' | 'tiktok';
         url?: string | null;
         id?: string | null;
       }[]
