@@ -13,6 +13,12 @@ const progress = campaign?.goalAmount
   ? Math.min(100, (effectiveAmount / campaign.goalAmount) * 100)
   : 0
 
+const totalUnits = campaign?.fixedUnitConfig?.totalUnits
+const unitName = campaign?.fixedUnitConfig?.unitName ?? 'unit'
+const effectiveUnitsSold = (campaign?.currentUnits ?? 0) + (campaign?.unitAdjustment ?? 0)
+const unitsRemaining = totalUnits != null ? Math.max(0, totalUnits - effectiveUnitsSold) : null
+const unitProgress = totalUnits ? Math.min(100, (effectiveUnitsSold / totalUnits) * 100) : 0
+
 const href = isGeneral ? '#donation-form' : `${basePath}/${campaign?.slug}`
 ---
 
@@ -31,7 +37,24 @@ const href = isGeneral ? '#donation-form' : `${basePath}/${campaign?.slug}`
   </span>
 
   {/* Campaign Info */}
-  {campaign?.goalAmount ? (
+  {unitsRemaining != null ? (
+    <div class="w-full">
+      <div class="flex items-baseline justify-center gap-1.5 text-[12px] lg:text-[13px] mb-2.5">
+        <span class="font-bold text-teal">{unitsRemaining.toLocaleString()}</span>
+        <span class="text-muted">{unitName}s remaining of {totalUnits!.toLocaleString()}</span>
+      </div>
+
+      {/* Progress Bar */}
+      <div class="relative h-1 lg:h-1.5 bg-navy/[0.08] rounded-full overflow-hidden">
+        <div
+          class="absolute inset-y-0 left-0 bg-gradient-to-r from-teal to-green transition-all duration-700 ease-out"
+          style={`width: ${unitProgress}%`}
+        >
+          <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 animate-shimmer"></div>
+        </div>
+      </div>
+    </div>
+  ) : campaign?.goalAmount ? (
     <div class="w-full">
       <div class="flex items-baseline justify-center gap-1.5 text-[12px] lg:text-[13px] mb-2.5">
         <span class="font-bold text-teal">£{effectiveAmount.toLocaleString()}</span>

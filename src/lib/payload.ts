@@ -135,6 +135,7 @@ export interface Campaign {
     pricePerUnit: number;
     unitName: string;
     maxQuantity: number;
+    totalUnits?: number;
   };
   ramadanConfig?: {
     ramadanStartDate: string;
@@ -151,6 +152,8 @@ export interface Campaign {
   goalAmount?: number;
   currentAmount: number;
   manualAdjustment?: number;
+  currentUnits?: number;
+  unitAdjustment?: number;
   active: boolean;
   featuredImage?: Media;
   order: number;
