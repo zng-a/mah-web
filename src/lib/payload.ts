@@ -150,6 +150,7 @@ export interface Campaign {
   endDate?: string;
   goalAmount?: number;
   currentAmount: number;
+  manualAdjustment?: number;
   active: boolean;
   featuredImage?: Media;
   order: number;

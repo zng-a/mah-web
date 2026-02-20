@@ -7,7 +7,7 @@ import { lexicalToHtml } from '../../lib/lexical';
 
 initRuntimeEnv(Astro);
 
-const campaign = await getCampaignBySlug('adopt-a-brick');
+const campaign = await getCampaignBySlug('adopt-a-space');
 if (!campaign || !campaign.active) {
   return Astro.redirect('/donate');
 }
@@ -20,7 +20,7 @@ const stripeRes = await fetch(`${PAYLOAD_URL}/api/stripe/publishable-key?tenant=
 
 const publishableKey = stripeRes?.publishableKey ?? '';
 
-const pricePerBrick = campaign.fixedUnitConfig?.pricePerUnit || 20;
+const pricePerSpace = campaign.fixedUnitConfig?.pricePerUnit || 20;
 const maxQuantity = campaign.fixedUnitConfig?.maxQuantity || 100;
 
 // Convert description from Lexical to HTML
@@ -51,8 +51,8 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
         <div class="text-[15px] md:text-[16px] text-muted max-w-[680px] mx-auto" set:html={descriptionHtml} />
       ) : (
         <p class="text-[15px] md:text-[16px] text-muted max-w-[680px] mx-auto">
-          Leave a lasting legacy by sponsoring bricks for our new masjid building.
-          Each brick represents your contribution to this blessed project.
+          Leave a lasting legacy by sponsoring spaces for our new masjid building.
+          Each space represents your contribution to this blessed project.
         </p>
       )}
     </div>
@@ -75,19 +75,20 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
         ))}
       </div>
 
-      <!-- Integrated brick selector within the donation flow -->
+      <!-- Integrated space selector within the donation flow -->
       <div class="mb-6">
         <DonationForm
           block={{
-            heading: 'Adopt Your Bricks',
-            description: `£${pricePerBrick} per brick`,
+            heading: 'Adopt Your Spaces',
+            description: `£${pricePerSpace} per space`,
             funds: campaign.fund ? [campaign.fund] : [],
-            amounts: [pricePerBrick].map(v => ({ value: v })),
+            amounts: [pricePerSpace].map(v => ({ value: v })),
             frequencies: [{ label: 'One-off', value: 'one-off' }],
             style: 'card',
             publishableKey: publishableKey,
             campaign: campaign,
             campaignType: 'fixed-unit',
+            paymentMethods: ['card'],
             hideFundSelector: true,
             hideFrequencySelector: true,
           }}
@@ -97,28 +98,25 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
   </div>
 </Base>
 
-<script define:vars={{ pricePerBrick, maxQuantity }}>
+<script define:vars={{ pricePerSpace, maxQuantity }}>
   // Wait for DOM and donation form to be ready
   document.addEventListener('DOMContentLoaded', () => {
     const donationForm = document.querySelector('.donation-form');
     if (!donationForm) return;
 
-    // Find amount buttons in the donation form
-    const amountBtns = donationForm.querySelectorAll('.df-amount');
-
-    // Replace amount grid with brick quantity selector
+    // Replace amount grid with space quantity selector
     const amountGrid = donationForm.querySelector('.df-amount-grid');
     if (amountGrid) {
-      // Create brick selector HTML
-      const brickSelector = `
+      // Create space selector HTML
+      const spaceSelector = `
         <div class="mb-3">
-          <label class="df-label">Number of Bricks</label>
+          <label class="df-label">Number of Spaces</label>
           <div class="grid grid-cols-4 gap-[6px] mb-3">
-            ${[1, 5, 10, 25].map((qty, idx) => `
+            ${[1, 2, 5, 10].map((qty, idx) => `
               <button
                 type="button"
-                data-brick-qty="${qty}"
-                class="brick-qty-btn font-bold text-[17px] rounded-[14px] h-[52px] transition-all duration-200 ${
+                data-space-qty="${qty}"
+                class="space-qty-btn font-bold text-[17px] rounded-[14px] h-[52px] transition-all duration-200 ${
                   idx === 0
                     ? 'bg-teal text-white shadow-[0_2px_12px_rgba(68,131,158,0.3)]'
                     : 'bg-navy/[0.04] text-navy hover:bg-navy/[0.08]'
@@ -129,49 +127,49 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
             `).join('')}
             <button
               type="button"
-              data-brick-qty="custom"
-              class="brick-qty-btn bg-navy/[0.04] text-navy font-bold text-[15px] rounded-[14px] h-[52px] hover:bg-navy/[0.08] transition-all duration-200"
+              data-space-qty="custom"
+              class="space-qty-btn bg-navy/[0.04] text-navy font-bold text-[15px] rounded-[14px] h-[52px] hover:bg-navy/[0.08] transition-all duration-200"
             >
               Custom
             </button>
           </div>
-          <div id="brick-custom-row" style="display:none;">
+          <div id="space-custom-row" style="display:none;">
             <input
               type="number"
               min="1"
               max="${maxQuantity}"
               value="1"
-              id="brick-quantity"
+              id="space-quantity"
               class="w-full h-[52px] px-4 rounded-[14px] bg-navy/[0.04] border-2 border-transparent font-bold text-[18px] text-navy focus:border-teal focus:outline-none transition-all mb-3"
               placeholder="Enter quantity"
             />
           </div>
           <p class="text-[14px] text-navy/60">
-            £${pricePerBrick} per brick • Total: <span id="brick-total" class="font-bold text-teal">£${pricePerBrick}</span>
+            £${pricePerSpace} per space • Total: <span id="space-total" class="font-bold text-teal">£${pricePerSpace}</span>
           </p>
         </div>
       `;
 
-      // Replace the amount grid with brick selector
+      // Replace the amount grid with space selector
       const parentDiv = amountGrid.parentElement;
       if (parentDiv) {
-        parentDiv.innerHTML = brickSelector;
+        parentDiv.innerHTML = spaceSelector;
       }
 
-      // Set up brick quantity handlers
+      // Set up space quantity handlers
       setTimeout(() => {
-        const brickButtons = donationForm.querySelectorAll('.brick-qty-btn');
-        const quantityInput = document.getElementById('brick-quantity');
-        const customRow = document.getElementById('brick-custom-row');
-        const totalDisplay = document.getElementById('brick-total');
+        const spaceButtons = donationForm.querySelectorAll('.space-qty-btn');
+        const quantityInput = document.getElementById('space-quantity');
+        const customRow = document.getElementById('space-custom-row');
+        const totalDisplay = document.getElementById('space-total');
 
-        function updateBrickAmount(quantity) {
-          const amount = quantity * pricePerBrick;
+        function updateSpaceAmount(quantity) {
+          const amount = quantity * pricePerSpace;
           if (totalDisplay) totalDisplay.textContent = `£${amount}`;
 
           // Update button states
-          brickButtons.forEach(btn => {
-            const isActive = btn.dataset.brickQty == quantity || (btn.dataset.brickQty === 'custom' && customRow?.style.display !== 'none');
+          spaceButtons.forEach(btn => {
+            const isActive = btn.dataset.spaceQty == quantity || (btn.dataset.spaceQty === 'custom' && customRow?.style.display !== 'none');
             if (isActive) {
               btn.classList.remove('bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]');
               btn.classList.add('bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]');
@@ -192,9 +190,9 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
         }
 
         // Button click handlers
-        brickButtons.forEach(btn => {
+        spaceButtons.forEach(btn => {
           btn.addEventListener('click', () => {
-            const qtyValue = btn.dataset.brickQty;
+            const qtyValue = btn.dataset.spaceQty;
 
             if (qtyValue === 'custom') {
               // Show custom input
@@ -203,7 +201,7 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
 
               // Update to current input value or default to 1
               const currentQty = parseInt(quantityInput?.value || '1');
-              updateBrickAmount(currentQty);
+              updateSpaceAmount(currentQty);
             } else {
               // Hide custom input
               if (customRow) customRow.style.display = 'none';
@@ -211,7 +209,7 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
               // Set quantity from button
               const qty = parseInt(qtyValue);
               if (quantityInput) quantityInput.value = qty.toString();
-              updateBrickAmount(qty);
+              updateSpaceAmount(qty);
             }
           });
         });
@@ -220,12 +218,12 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
         if (quantityInput) {
           quantityInput.addEventListener('input', () => {
             const qty = Math.max(1, parseInt(quantityInput.value) || 1);
-            updateBrickAmount(qty);
+            updateSpaceAmount(qty);
           });
         }
 
-        // Initialize with 1 brick
-        updateBrickAmount(1);
+        // Initialize with 1 space
+        updateSpaceAmount(1);
       }, 100);
     }
   });

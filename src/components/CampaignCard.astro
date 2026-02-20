@@ -8,8 +8,9 @@ interface Props {
 }
 
 const { campaign, isGeneral = false, basePath = '/donate' } = Astro.props
+const effectiveAmount = (campaign?.currentAmount ?? 0) + (campaign?.manualAdjustment ?? 0)
 const progress = campaign?.goalAmount
-  ? Math.min(100, (campaign.currentAmount / campaign.goalAmount) * 100)
+  ? Math.min(100, (effectiveAmount / campaign.goalAmount) * 100)
   : 0
 
 const href = isGeneral ? '#donation-form' : `${basePath}/${campaign?.slug}`
@@ -33,7 +34,7 @@ const href = isGeneral ? '#donation-form' : `${basePath}/${campaign?.slug}`
   {campaign?.goalAmount ? (
     <div class="w-full">
       <div class="flex items-baseline justify-center gap-1.5 text-[12px] lg:text-[13px] mb-2.5">
-        <span class="font-bold text-teal">£{campaign.currentAmount.toLocaleString()}</span>
+        <span class="font-bold text-teal">£{effectiveAmount.toLocaleString()}</span>
         <span class="text-muted">of £{campaign.goalAmount.toLocaleString()}</span>
       </div>
 
