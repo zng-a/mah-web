@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import BlockRenderer from '../components/BlockRenderer.astro';
 import DonateBar from '../components/DonateBar.astro';
+import MaintenancePage from '../components/MaintenancePage.astro';
 import { getPageBySlug, getDonateSettings } from '../lib/payload';
 import type { Page, DonateSettings } from '../lib/payload';
 import { getTodayPrayerTimes } from '../lib/prayer-times';
@@ -21,23 +22,37 @@ if (pageSlug === 'home') {
 }
 
 const isPreview = Astro.url.searchParams.has('preview');
-const page = (isPreview ? getPreviewData(pageSlug) as Page | null : null)
-  ?? await getPageBySlug(pageSlug).catch(() => null);
+
+let page: Page | null = isPreview ? (getPreviewData(pageSlug) as Page | null) : null;
+let payloadUnavailable = false;
 
 if (!page) {
+  try {
+    page = await getPageBySlug(pageSlug);
+  } catch {
+    payloadUnavailable = true;
+  }
+}
+
+if (payloadUnavailable) {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '300');
+}
+
+if (!payloadUnavailable && !page) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 
-// Fetch supplementary data in parallel
-const [donateSettings, prayerData] = await Promise.all([
+// Fetch supplementary data only when we have a page to render
+const [donateSettings, prayerData] = page ? await Promise.all([
   page.showDonateBar ? getDonateSettings().catch(() => null as DonateSettings | null) : null,
   getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
-]);
+]) : [null, null];
 
-const layout = page.layout ?? [];
+const layout = page?.layout ?? [];
 
-const showDonate = page.showDonateBar && donateSettings;
-const donatePosition = page.donateBarPosition ?? 'below-hero';
+const showDonate = page?.showDonateBar && donateSettings;
+const donatePosition = page?.donateBarPosition ?? 'below-hero';
 
 // Find where the first hero ends (for donate bar "below-hero" positioning)
 const heroIdx = layout.findIndex((b) => b.blockType === 'hero-slider' || b.blockType === 'hero-simple');
@@ -56,26 +71,32 @@ const donate: DonateSettings = donateSettings ?? {
 };
 ---
 
-<Base title={page.title} prayerData={prayerData}>
-  {showDonate && donatePosition === 'below-hero' ? (
-    <>
-      <!-- Blocks before and including the hero -->
-      <BlockRenderer blocks={layout.slice(0, afterHeroIdx)} />
-      <!-- Donate bar after hero -->
-      <div class="max-w-[1440px] mx-auto">
-        <DonateBar donate={donate} />
-      </div>
-      <!-- Remaining blocks -->
-      <BlockRenderer blocks={layout.slice(afterHeroIdx)} />
-    </>
-  ) : (
-    <>
-      <BlockRenderer blocks={layout} />
-      {showDonate && donatePosition === 'above-footer' && (
+{payloadUnavailable ? (
+  <Base title="Temporarily Unavailable">
+    <MaintenancePage />
+  </Base>
+) : (
+  <Base title={page!.title} prayerData={prayerData}>
+    {showDonate && donatePosition === 'below-hero' ? (
+      <>
+        <!-- Blocks before and including the hero -->
+        <BlockRenderer blocks={layout.slice(0, afterHeroIdx)} />
+        <!-- Donate bar after hero -->
         <div class="max-w-[1440px] mx-auto">
           <DonateBar donate={donate} />
         </div>
-      )}
-    </>
-  )}
-</Base>
+        <!-- Remaining blocks -->
+        <BlockRenderer blocks={layout.slice(afterHeroIdx)} />
+      </>
+    ) : (
+      <>
+        <BlockRenderer blocks={layout} />
+        {showDonate && donatePosition === 'above-footer' && (
+          <div class="max-w-[1440px] mx-auto">
+            <DonateBar donate={donate} />
+          </div>
+        )}
+      </>
+    )}
+  </Base>
+)}

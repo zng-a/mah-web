@@ -50,7 +50,8 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
 
   <div class="max-w-[1200px] mx-auto px-5 md:px-10 py-12">
     <div class="text-center mb-8">
-      <h1 class="text-navy text-[32px] md:text-[38px] font-bold mb-3">{campaign.name}</h1>
+      <h1 class="text-navy text-[32px] md:text-[38px] font-bold mb-2">{campaign.name}</h1>
+      <p class="text-teal text-[15px] md:text-[17px] font-medium mb-3">Reserve Your Space in the House of Allah.</p>
       {descriptionHtml ? (
         <div class="text-[15px] md:text-[16px] text-muted max-w-[680px] mx-auto" set:html={descriptionHtml} />
       ) : (
@@ -64,21 +65,22 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
     <div class="max-w-[900px] mx-auto">
       {/* Spaces Remaining Progress */}
       {spacesRemaining != null && (
-        <div class="bg-navy/[0.03] border border-navy/[0.08] rounded-2xl px-6 py-5 mb-8 text-center">
-          <div class="flex items-baseline justify-center gap-2 mb-1">
-            <span class="text-[32px] md:text-[38px] font-bold text-teal">{spacesRemaining.toLocaleString()}</span>
-            <span class="text-[15px] md:text-[16px] text-navy/60">spaces remaining</span>
+        <div class="border border-navy/[0.08] rounded-xl px-4 py-3 mb-6 flex items-center gap-4">
+          <div class="shrink-0 text-center">
+            <span class="text-[22px] font-bold text-teal leading-none">{spacesRemaining.toLocaleString()}</span>
+            <p class="text-[11px] text-navy/50 mt-0.5">of {totalSpaces!.toLocaleString()} remaining</p>
           </div>
-          <p class="text-[13px] text-navy/50 mb-4">out of {totalSpaces!.toLocaleString()} total spaces</p>
-          <div class="relative h-2.5 bg-navy/[0.08] rounded-full overflow-hidden">
-            <div
-              class="absolute inset-y-0 left-0 bg-gradient-to-r from-teal to-green rounded-full transition-all duration-700 ease-out"
-              style={`width: ${spaceProgress}%`}
-            >
-              <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0" style="animation: shimmer 2.5s infinite;"></div>
+          <div class="flex-1 min-w-0">
+            <div class="relative h-2 bg-navy/[0.08] rounded-full overflow-hidden">
+              <div
+                class="absolute inset-y-0 left-0 bg-gradient-to-r from-teal to-green rounded-full transition-all duration-700 ease-out"
+                style={`width: ${spaceProgress}%`}
+              >
+                <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0" style="animation: shimmer 2.5s infinite;"></div>
+              </div>
             </div>
+            <p class="text-[11px] text-navy/40 mt-1">{Math.round(spaceProgress)}% of spaces adopted</p>
           </div>
-          <p class="text-[12px] text-navy/40 mt-2">{Math.round(spaceProgress)}% of spaces adopted</p>
         </div>
       )}
 
@@ -88,7 +90,8 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
           'One-time payment',
           'Lasting legacy',
           'Gift Aid eligible',
-          'Secure payment'
+          'Secure payment',
+          'Certificate of Donation',
         ].map(feature => (
           <div class="inline-flex items-center gap-1.5 bg-teal/[0.08] border border-teal/20 rounded-full px-3 md:px-4 py-1.5 text-[12px] md:text-[13px] font-medium text-navy">
             <svg class="w-3.5 h-3.5 text-teal shrink-0" fill="currentColor" viewBox="0 0 16 16">
@@ -97,6 +100,22 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
             <span>{feature}</span>
           </div>
         ))}
+      </div>
+
+      {/* Certificate request banner */}
+      <div class="mb-5 flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-navy/[0.03] border border-navy/[0.07]">
+        <div class="text-[13px] text-navy/70">
+          <span class="font-medium text-navy">Already donated?</span> Request your Certificate of Donation.
+        </div>
+        <a
+          href="/donate/certificate"
+          class="shrink-0 inline-flex items-center gap-1.5 text-[13px] font-medium text-teal hover:text-navy transition-colors"
+        >
+          Get Certificate
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
       </div>
 
       <!-- Integrated space selector within the donation flow -->
@@ -115,6 +134,7 @@ const descriptionHtml = campaign.description ? lexicalToHtml(campaign.descriptio
             paymentMethods: ['card'],
             hideFundSelector: true,
             hideFrequencySelector: true,
+            certificateNotice: true,
           }}
         />
       </div>

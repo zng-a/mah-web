@@ -1,8 +1,15 @@
 ---
 import '../styles/global.css';
 import { getTodayPrayerTimes } from '../lib/prayer-times';
+import { getPrayerTimesSettings } from '../lib/payload';
+import { initRuntimeEnv } from '../lib/runtime-env';
 
-const prayerData = await getTodayPrayerTimes();
+initRuntimeEnv(Astro);
+
+const [prayerData, prayerTimesSettings] = await Promise.all([
+  getTodayPrayerTimes().catch(() => null),
+  getPrayerTimesSettings().catch(() => null),
+]);
 
 // Calculate time until next prayer
 let timeUntilNext = '';
@@ -27,8 +34,9 @@ if (prayerData?.nextPrayer) {
   timeUntilNext = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`;
 }
 
-// Hardcoded Jummah times
-const jummahTimes = '1st: 12:45 | 2nd: 1:30';
+const jummahList = prayerTimesSettings?.jummahTimes
+  ? prayerTimesSettings.jummahTimes.split('|').map((s: string) => s.trim()).filter(Boolean)
+  : [];
 ---
 
 <html lang="en" style="background: #0A1C30">
@@ -156,9 +164,10 @@ const jummahTimes = '1st: 12:45 | 2nd: 1:30';
           </table>
 
           <!-- Jummah Times -->
-          {jummahTimes && (
-            <div style="margin-top: 14px; padding-top: 14px; border-top: 2px solid #f0f0f0; text-align: center; color: #666; font-size: 13px;">
-              <strong style="color: #0A1C30; font-weight: 700;">Jummah:</strong> {jummahTimes}
+          {jummahList.length > 0 && (
+            <div style="margin-top: 14px; background: #f5f5f5; border-radius: 12px; padding: 9px 14px; display: flex; align-items: center; justify-content: center; gap: 12px;">
+              <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(10,28,48,0.5); white-space: nowrap;">Jumu'ah</span>
+              <span style="font-size: 12px; font-weight: 600; color: #0A1C30;">{jummahList.join(' · ')}</span>
             </div>
           )}
 

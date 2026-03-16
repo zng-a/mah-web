@@ -185,7 +185,7 @@ function isLinkActive(linkHref: string): boolean {
     <div id="mobile-menu" class="fixed inset-0 bg-white z-50 lg:hidden transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
       <div class="flex items-center justify-between px-5 pt-4 pb-2">
         <a href="/">
-          <img src={logoUrl} alt="QIS" class="w-[90px] h-auto" />
+          <img src={logoUrl} alt={siteSettings?.siteTitle ?? ''} class="w-[90px] h-auto" />
         </a>
         <button id="menu-close" class="text-navy p-2" aria-label="Close menu">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -236,12 +236,12 @@ function isLinkActive(linkHref: string): boolean {
             : (
               <>
                 <a href="/" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Home</a>
+                <a href="/about" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/about' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>About</a>
+                <a href="/services" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/services' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Services</a>
                 <a href="/salah-times" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/salah-times' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Salah Times</a>
+                <a href="/news" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath.startsWith('/news') ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>News</a>
                 <a href="/donate" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath.startsWith('/donate') ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Donate</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">About QIS</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Services</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">News</a>
-                <a href="#" class="block text-navy text-[20px] font-bold py-4 px-5 rounded-xl hover:bg-teal-tint transition-colors">Contact Us</a>
+                <a href="/contact" class={`block text-navy text-[20px] font-bold py-4 px-5 rounded-xl ${currentPath === '/contact' ? 'bg-teal-tint' : 'hover:bg-teal-tint'} transition-colors`}>Contact Us</a>
               </>
             )
           }
@@ -330,18 +330,12 @@ function isLinkActive(linkHref: string): boolean {
         : (
           <>
             <a href="/" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Home</a>
+            <a href="/about" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/about' ? 'bg-white/20' : 'hover:bg-white/10'}`}>About</a>
+            <a href="/services" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/services' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Services</a>
             <a href="/salah-times" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/salah-times' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Salah Times</a>
+            <a href="/news" class={`px-5 py-2 rounded-xl transition-colors ${currentPath.startsWith('/news') ? 'bg-white/20' : 'hover:bg-white/10'}`}>News</a>
             <a href="/donate" class={`px-5 py-2 rounded-xl transition-colors ${currentPath.startsWith('/donate') ? 'bg-white/20' : 'hover:bg-white/10'}`}>Donate</a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
-              About QIS
-              <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-            </a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10 flex items-center gap-1">
-              Services
-              <svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-            </a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">News</a>
-            <a href="#" class="px-5 py-2 rounded-xl transition-colors hover:bg-white/10">Contact Us</a>
+            <a href="/contact" class={`px-5 py-2 rounded-xl transition-colors ${currentPath === '/contact' ? 'bg-white/20' : 'hover:bg-white/10'}`}>Contact Us</a>
           </>
         )
       }
@@ -363,7 +357,9 @@ function isLinkActive(linkHref: string): boolean {
                 {footer.address.line2 && <>{footer.address.line2}<br /></>}
                 {footer.address.city && footer.address.postcode && <>{footer.address.city}, {footer.address.postcode}</>}
               </address>
-              <a href="https://maps.app.goo.gl/7exKUquSwuD6tGyh7" target="_blank" rel="noopener noreferrer" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
+              {footer?.address?.directionsUrl && (
+                <a href={footer.address.directionsUrl} target="_blank" rel="noopener noreferrer" class="text-teal font-medium text-[14px] lg:text-[15px] mt-2 inline-block hover:text-navy transition-colors">Directions →</a>
+              )}
             </div>
           )}
 
@@ -373,7 +369,9 @@ function isLinkActive(linkHref: string): boolean {
               <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">{col.heading}</h4>
               <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
                 {col.links?.map((link) => {
-                  const href = link.linkType === 'custom' ? (link.url || '#') : (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
+                  const href = (link.linkType === 'custom' || link.url)
+                    ? (link.url || '#')
+                    : (link.page && typeof link.page === 'object' ? `/${link.page.slug}` : '#');
                   return (
                     <li><a href={href} class="text-teal hover:text-navy transition-colors">{link.label}</a></li>
                   );
@@ -386,35 +384,25 @@ function isLinkActive(linkHref: string): boolean {
           {(!footer?.columns || footer.columns.length === 0) && (
             <>
               <div>
-                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">About</h4>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Masjid</h4>
                 <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">About QIS</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Services</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Roles</a></li>
+                  <li><a href="/about" class="text-teal hover:text-navy transition-colors">About</a></li>
+                  <li><a href="/services" class="text-teal hover:text-navy transition-colors">Services</a></li>
+                  <li><a href="/contact" class="text-teal hover:text-navy transition-colors">Contact Us</a></li>
                 </ul>
               </div>
               <div>
-                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Features</h4>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Worship</h4>
                 <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Donate Online</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Prayer Times</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Mobile App</a></li>
+                  <li><a href="/salah-times" class="text-teal hover:text-navy transition-colors">Salah Times</a></li>
+                  <li><a href="/news" class="text-teal hover:text-navy transition-colors">News</a></li>
                 </ul>
               </div>
               <div>
-                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Information</h4>
+                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Support Us</h4>
                 <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Announcements</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Facilities</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Our Schools</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="font-medium text-[14px] lg:text-[15px] mb-2.5 lg:mb-3">Help</h4>
-                <ul class="space-y-2 lg:space-y-2.5 text-[14px] lg:text-[15px]">
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Contact Us</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Application Forms</a></li>
-                  <li><a href="#" class="text-teal hover:text-navy transition-colors">Become a Member</a></li>
+                  <li><a href="/donate" class="text-teal hover:text-navy transition-colors">Donate Online</a></li>
+                  <li><a href="/donate/manage" class="text-teal hover:text-navy transition-colors">Manage Donations</a></li>
                 </ul>
               </div>
             </>
@@ -430,17 +418,22 @@ function isLinkActive(linkHref: string): boolean {
               <span class="text-white/50 text-[12px]">Registered Charity No. {footer.charityNumber}</span>
             )}
           </div>
-          {socialLinks.length > 0 && (
-            <div class="flex items-center gap-3">
-              {socialLinks.map(link => (
-                <a href={link.url!} target="_blank" rel="noopener noreferrer" aria-label={socialLabels[link.platform!] ?? link.platform} class="text-white/40 hover:text-white/80 transition-colors">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <Fragment set:html={socialIcons[link.platform!] ?? ''} />
-                  </svg>
-                </a>
-              ))}
-            </div>
-          )}
+          <div class="flex items-center gap-4 flex-wrap justify-center">
+            <a href="/privacy-policy" class="text-white/50 hover:text-white/80 transition-colors">Privacy Policy</a>
+            <a href="/terms-and-conditions" class="text-white/50 hover:text-white/80 transition-colors">Terms &amp; Conditions</a>
+            <a href="/donate/manage" class="text-white/50 hover:text-white/80 transition-colors">Manage Donations</a>
+            {socialLinks.length > 0 && (
+              <div class="flex items-center gap-3">
+                {socialLinks.map(link => (
+                  <a href={link.url!} target="_blank" rel="noopener noreferrer" aria-label={socialLabels[link.platform!] ?? link.platform} class="text-white/40 hover:text-white/80 transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <Fragment set:html={socialIcons[link.platform!] ?? ''} />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </footer>

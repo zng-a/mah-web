@@ -19,6 +19,7 @@ interface Props {
     hideFrequencySelector?: boolean;
     frequencyFirstFullWidth?: boolean;
     paymentMethods?: string[] | null;
+    certificateNotice?: boolean;
   };
 }
 
@@ -33,9 +34,10 @@ const funds: DonationFund[] = (block.funds ?? []).filter(
   (f): f is DonationFund => typeof f === 'object' && f !== null
 );
 
-const amounts = block.amounts?.length
+const amounts = (block.amounts?.length
   ? block.amounts.map(a => a.value)
-  : [10, 20, 30, 50, 75, 100];
+  : [10, 20, 30, 50, 75, 100]
+).filter(a => a >= 2);
 
 const frequencies = block.frequencies?.length
   ? block.frequencies
@@ -64,6 +66,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       data-default-fund-name={defaultFund?.name ?? ''}
       data-publishable-key={publishableKey}
       data-campaign-id={block.campaign?.id ?? ''}
+      data-campaign-slug={block.campaign?.slug ?? ''}
       data-campaign-type={block.campaignType ?? ''}
       data-ramadan-start-date={block.ramadanStartDate ?? ''}
       data-total-installments={block.totalInstallments ?? ''}
@@ -131,17 +134,18 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
 
         <!-- Custom amount input -->
         <div class="df-custom-row" style="display:none;">
-          <div class="flex items-center gap-1 bg-navy/[0.04] rounded-[14px] h-[52px] px-4 mb-5 focus-within:ring-2 focus-within:ring-teal/40 transition-all">
+          <div class="df-custom-wrap flex items-center gap-1 bg-navy/[0.04] rounded-[14px] h-[52px] px-4 mb-1 focus-within:ring-2 focus-within:ring-teal/40 transition-all">
             <span class="text-navy text-[20px] font-bold">&pound;</span>
             <input
               type="number"
-              min="1"
+              min="2"
               step="1"
               inputmode="numeric"
               placeholder="Enter amount"
               class="df-custom-input w-full bg-transparent text-navy font-bold text-[20px] outline-none placeholder:text-navy/30 placeholder:font-medium placeholder:text-[16px]"
             />
           </div>
+          <p class="df-custom-error hidden text-red-500 text-[13px] mb-4 pl-1">Minimum donation amount is £2.</p>
         </div>
         )}
 
@@ -280,6 +284,37 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           </label>
         </div>
 
+        <!-- ═══ Notes ═══ -->
+        <div class="mb-6">
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <div class="relative mt-[2px] shrink-0">
+              <input type="checkbox" class="df-notes-check sr-only" />
+              <div class="df-notes-box w-[22px] h-[22px] rounded-[6px] border-2 border-navy/20 bg-white transition-all duration-200 flex items-center justify-center">
+                <svg class="df-notes-tick w-3 h-3 text-white opacity-0 transition-opacity" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.5L4 8.5L11 1.5"/></svg>
+              </div>
+            </div>
+            <span class="text-navy text-[14px] sm:text-[15px] leading-snug">Add a note to your donation</span>
+          </label>
+          <div class="df-notes-fields">
+            <textarea
+              class="df-notes-input df-input mt-3 resize-none"
+              style="height: 88px; padding-top: 10px; padding-bottom: 10px;"
+              placeholder="Your message (optional)..."
+              maxlength="500"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- ═══ Certificate Notice ═══ -->
+        {block.certificateNotice && (
+          <div class="mb-6 flex items-start gap-2.5 px-4 py-3 rounded-[14px] bg-teal/[0.06] border border-teal/20 text-[13px] text-navy/70">
+            <svg class="w-4 h-4 text-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <span>After payment, you can generate a personalised <strong class="text-navy font-semibold">e-certificate</strong> for each space you adopt.</span>
+          </div>
+        )}
+
         <!-- ═══ Donate Button ═══ -->
         <button
           type="button"
@@ -366,6 +401,18 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
     opacity: 1;
   }
 
+  /* Notes fields reveal animation */
+  .df-notes-fields {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    max-height: 0;
+    opacity: 0;
+  }
+  .df-notes-fields.is-open {
+    max-height: 200px;
+    opacity: 1;
+  }
+
   /* Explicit button color declarations — unlayered so they win over @layer utilities
      in PWA/standalone contexts where cascade layer resolution may differ */
   :global(.df-cta-btn) {
@@ -394,6 +441,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       let isLoading = false;
       let giftAid = false;
       let coverFees = false;
+      let showNotes = false;
 
       const amountBtns = form.querySelectorAll<HTMLButtonElement>('.df-amount');
       const freqBtns = form.querySelectorAll<HTMLButtonElement>('.df-freq');
@@ -416,6 +464,11 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       const coverFeesBox = form.querySelector<HTMLElement>('.df-cover-fees-box');
       const coverFeesTick = form.querySelector<HTMLElement>('.df-cover-fees-tick');
       const feeAmountEl = form.querySelector<HTMLElement>('.df-fee-amount');
+      const notesCheck = form.querySelector<HTMLInputElement>('.df-notes-check');
+      const notesBox = form.querySelector<HTMLElement>('.df-notes-box');
+      const notesTick = form.querySelector<HTMLElement>('.df-notes-tick');
+      const notesFields = form.querySelector<HTMLElement>('.df-notes-fields');
+      const notesInput = form.querySelector<HTMLTextAreaElement>('.df-notes-input');
 
       // ── Helpers ──
 
@@ -577,9 +630,17 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         });
       });
 
+      const customError = form.querySelector<HTMLElement>('.df-custom-error');
+      const customWrap = form.querySelector<HTMLElement>('.df-custom-wrap');
+
       customInput?.addEventListener('input', () => {
         const val = Number(customInput.value);
-        if (val > 0) {
+        const isBelowMin = customInput.value !== '' && val < 2;
+        customError?.classList.toggle('hidden', !isBelowMin);
+        customWrap?.classList.toggle('ring-2', isBelowMin);
+        customWrap?.classList.toggle('ring-red-400', isBelowMin);
+        customWrap?.classList.toggle('focus-within:ring-teal/40', !isBelowMin);
+        if (val >= 2) {
           selectedAmount = val;
           updateCTA();
           updateGiftAidDisplay();
@@ -625,6 +686,30 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
         updateElementsAmount();
       });
 
+      // ── Notes toggle ──
+      notesCheck?.addEventListener('change', () => {
+        showNotes = notesCheck.checked;
+        if (notesBox) {
+          notesBox.classList.toggle('bg-teal', showNotes);
+          notesBox.classList.toggle('border-teal', showNotes);
+          notesBox.classList.toggle('bg-white', !showNotes);
+          notesBox.classList.toggle('border-navy/20', !showNotes);
+        }
+        if (notesTick) {
+          notesTick.classList.toggle('opacity-0', !showNotes);
+          notesTick.classList.toggle('opacity-100', showNotes);
+        }
+        if (notesFields) {
+          if (showNotes) {
+            void notesFields.offsetHeight;
+            notesFields.classList.add('is-open');
+            setTimeout(() => notesInput?.focus(), 50);
+          } else {
+            notesFields.classList.remove('is-open');
+          }
+        }
+      });
+
       // ── Gift Aid toggle ──
       giftAidCheck?.addEventListener('change', () => {
         giftAid = giftAidCheck.checked;
@@ -642,13 +727,13 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
       // ── Validation ──
       function validate(): string | null {
         if (isCustom) {
-          if (!customInput?.value || Number(customInput.value) < 1) {
-            return 'Please enter a valid donation amount.';
+          if (!customInput?.value || Number(customInput.value) < 2) {
+            return 'Please enter a minimum donation amount of £2.';
           }
           selectedAmount = Number(customInput.value);
         }
-        if (!selectedAmount || selectedAmount < 1) {
-          return 'Please select a donation amount.';
+        if (!selectedAmount || selectedAmount < 2) {
+          return 'Please select a donation amount of at least £2.';
         }
 
         const namePattern = /^[A-Za-z\s\-']+$/;
@@ -848,6 +933,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
           quantity: form.dataset.campaignQuantity ? parseInt(form.dataset.campaignQuantity) : undefined,
           ramadanStartDate: form.dataset.ramadanStartDate || undefined,
           totalInstallments: form.dataset.totalInstallments ? parseInt(form.dataset.totalInstallments) : undefined,
+          notes: (showNotes && notesInput?.value?.trim()) ? notesInput.value.trim() : undefined,
         };
 
         // Debug logging for campaign donations
@@ -900,6 +986,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
             ...(selectedFundName && { fundName: selectedFundName }),
             ...(data.subscriptionId ? { subscriptionId: data.subscriptionId } : {}),
             ...(donorData.donorName ? { donorName: donorData.donorName as string } : {}),
+            ...(form.dataset.campaignSlug ? { campaignSlug: form.dataset.campaignSlug } : {}),
             ...(addr?.line1 ? { addrLine1: addr.line1 } : {}),
             ...(addr?.line2 ? { addrLine2: addr.line2 } : {}),
             ...(addr?.city ? { addrCity: addr.city } : {}),
@@ -962,6 +1049,7 @@ const freqLabel = (v: string) => frequencies.find(f => f.value === v)?.label ?? 
                   coversFees: coverFees,
                   giftAid,
                   ...(donorData.address && { address: donorData.address }),
+                  ...(donorData.notes && { notes: donorData.notes }),
                 }),
               });
               if (!confirmRes.ok) {

@@ -1,0 +1,729 @@
+---
+import Base from '../../layouts/Base.astro';
+import { initRuntimeEnv } from '../../lib/runtime-env';
+
+initRuntimeEnv(Astro);
+---
+
+<Base title="Request Your Certificate | Adopt a Space">
+  {/* Breadcrumb */}
+  <div class="px-5 md:px-10 py-4">
+    <div class="flex items-center gap-3 text-[13px] md:text-[14px]">
+      <a href="/donate/adopt-a-space" class="inline-flex items-center gap-2 text-teal hover:text-navy transition-colors font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span>Back</span>
+      </a>
+      <span class="text-muted">/</span>
+      <a href="/donate" class="text-teal hover:text-navy transition-colors font-medium">Donate</a>
+      <span class="text-muted">/</span>
+      <a href="/donate/adopt-a-space" class="text-teal hover:text-navy transition-colors font-medium">Adopt a Space</a>
+      <span class="text-muted">/</span>
+      <span class="text-navy">Certificate</span>
+    </div>
+  </div>
+
+  <div class="max-w-[640px] mx-auto px-5 md:px-10 py-10">
+
+    {/* Page header */}
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal/[0.08] mb-4">
+        <svg class="w-7 h-7 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h1 class="text-navy text-[28px] md:text-[34px] font-bold mb-2">Request Your E-Certificate</h1>
+      <p class="text-muted text-[15px] max-w-[460px] mx-auto leading-relaxed">
+        Receive a personalised electronic Certificate of Donation for each space you have adopted at Masjid Al-Hikmah. Certificates are issued as downloadable PDFs.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-2 mt-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal/[0.07] border border-teal/20 text-[12px] font-medium text-teal">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+          </svg>
+          Digital PDF — download instantly
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal/[0.07] border border-teal/20 text-[12px] font-medium text-teal">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"/>
+          </svg>
+          Ready to print — at your local print shop
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal/[0.07] border border-teal/20 text-[12px] font-medium text-teal">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+          </svg>
+          Send a digital copy to loved ones from afar
+        </div>
+      </div>
+    </div>
+
+    {/* Step indicator */}
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <div id="dot-1" class="w-2.5 h-2.5 rounded-full bg-teal transition-all duration-200"></div>
+      <div class="w-12 h-px bg-navy/[0.12]"></div>
+      <div id="dot-2" class="w-2.5 h-2.5 rounded-full bg-navy/[0.15] transition-all duration-200"></div>
+      <div class="w-12 h-px bg-navy/[0.12]"></div>
+      <div id="dot-3" class="w-2.5 h-2.5 rounded-full bg-navy/[0.15] transition-all duration-200"></div>
+      <div class="w-12 h-px bg-navy/[0.12]"></div>
+      <div id="dot-4" class="w-2.5 h-2.5 rounded-full bg-navy/[0.15] transition-all duration-200"></div>
+    </div>
+
+    {/* ── STEP 1 — Donation type ─────────────────────────────────── */}
+    <div id="step-1" class="portal-step">
+      <div class="bg-white border border-navy/[0.08] rounded-[20px] p-7">
+        <h2 class="text-navy text-[20px] font-bold mb-1.5">How did you make your donation?</h2>
+        <p class="text-muted text-[14px] leading-relaxed mb-6">This helps us verify your spaces and issue the correct number of certificates.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button id="btn-online" class="flex items-center gap-3.5 p-4 border-[1.5px] border-navy/[0.1] rounded-2xl bg-white text-left transition-all duration-150 hover:border-teal/60 hover:shadow-[0_2px_12px_rgba(68,131,158,0.1)]">
+            <div class="shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-teal/[0.08] text-teal">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[15px] font-600 font-semibold text-navy">Online Donation</div>
+              <div class="text-[12px] text-muted mt-0.5">Paid via the website or app</div>
+            </div>
+          </button>
+
+          <button id="btn-offline" class="flex items-center gap-3.5 p-4 border-[1.5px] border-navy/[0.1] rounded-2xl bg-white text-left transition-all duration-150 hover:border-teal/60 hover:shadow-[0_2px_12px_rgba(68,131,158,0.1)]">
+            <div class="shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-teal/[0.08] text-teal">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[15px] font-semibold text-navy">In Person (Cash/Card)</div>
+              <div class="text-[12px] text-muted mt-0.5">Donated at the masjid directly</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* ── STEP 2A — Online email lookup ─────────────────────────── */}
+    <div id="step-2-online" class="portal-step hidden">
+      <div class="bg-white border border-navy/[0.08] rounded-[20px] p-7">
+        <h2 class="text-navy text-[20px] font-bold mb-1.5">Find your spaces</h2>
+        <p class="text-muted text-[14px] leading-relaxed mb-6">Enter the email address you used when donating and we'll look up your adopted spaces.</p>
+
+        <label class="block text-[13px] font-semibold text-navy mb-1.5" for="donor-email">Email address</label>
+        <div class="flex gap-2">
+          <input
+            type="email"
+            id="donor-email"
+            class="flex-1 h-12 px-4 rounded-[12px] border-[1.5px] border-navy/[0.12] text-[15px] text-navy bg-white outline-none focus:border-teal transition-colors"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          <button id="lookup-btn" class="shrink-0 h-12 px-5 rounded-[12px] bg-teal text-white text-[14px] font-semibold transition-all duration-150 hover:bg-navy flex items-center gap-2">
+            <span id="lookup-btn-text">Look up</span>
+            <svg id="lookup-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Lookup result — hidden until lookup runs */}
+        <div id="lookup-result" class="hidden mt-4"></div>
+
+        {/* Proceed panel — shown after successful lookup */}
+        <div id="proceed-panel" class="hidden mt-5 pt-5 border-t border-navy/[0.08]">
+          <p id="proceed-summary" class="text-[14px] text-navy/70 mb-4"></p>
+
+          {/* Name verification */}
+          <div class="mb-4">
+            <label class="block text-[13px] font-semibold text-navy mb-1.5" for="verify-name">
+              Confirm your full name
+            </label>
+            <input
+              type="text"
+              id="verify-name"
+              class="w-full h-11 px-4 rounded-[12px] border-[1.5px] border-navy/[0.12] text-[15px] text-navy bg-white outline-none focus:border-teal transition-colors"
+              placeholder="First and last name, e.g. Ibrahim Ali"
+              autocomplete="name"
+            />
+            <p id="name-verify-error" class="hidden mt-1.5 text-[12px] text-red-700"></p>
+          </div>
+
+          <button id="proceed-to-step3-online" class="w-full h-12 rounded-[14px] bg-teal text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-all duration-150 hover:bg-navy hover:shadow-[0_4px_16px_rgba(15,36,62,0.2)]">
+            <span id="proceed-btn-text">Personalise My Certificates</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex gap-3 mt-5 pt-5 border-t border-navy/[0.08]">
+          <button id="back-to-1-from-online" class="h-11 px-5 rounded-[12px] bg-navy/[0.05] text-navy text-[14px] font-medium hover:bg-navy/[0.1] transition-colors">← Back</button>
+        </div>
+      </div>
+    </div>
+
+    {/* ── STEP 2B — Offline quantity ─────────────────────────────── */}
+    <div id="step-2-offline" class="portal-step hidden">
+      <div class="bg-white border border-navy/[0.08] rounded-[20px] p-7">
+        <h2 class="text-navy text-[20px] font-bold mb-1.5">How many spaces did you adopt?</h2>
+        <p class="text-muted text-[14px] leading-relaxed mb-6">Select the number of spaces you donated in person. Each space gets its own certificate.</p>
+
+        <label class="block text-[13px] font-semibold text-navy mb-2">Number of spaces</label>
+        <div class="grid grid-cols-4 gap-2 mb-3">
+          {[1, 2, 3, 5].map((n, i) => (
+            <button
+              type="button"
+              class={`h-12 rounded-[12px] text-[17px] font-bold transition-all duration-150 qty-btn ${i === 0 ? 'bg-teal text-white shadow-[0_2px_12px_rgba(68,131,158,0.3)]' : 'bg-navy/[0.04] text-navy hover:bg-navy/[0.08]'}`}
+              data-qty={n}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+
+        <button type="button" id="show-custom-qty" class="text-[13px] text-teal hover:underline">Enter a different amount</button>
+        <div id="custom-qty-row" class="hidden mt-2">
+          <input
+            type="number"
+            id="custom-qty-input"
+            min="1"
+            max="100"
+            class="w-full h-12 px-4 rounded-[12px] border-[1.5px] border-navy/[0.12] text-[15px] text-navy bg-white outline-none focus:border-teal transition-colors"
+            placeholder="e.g. 10"
+          />
+        </div>
+
+        <div class="flex gap-3 mt-6 pt-5 border-t border-navy/[0.08]">
+          <button id="back-to-1-from-offline" class="h-11 px-5 rounded-[12px] bg-navy/[0.05] text-navy text-[14px] font-medium hover:bg-navy/[0.1] transition-colors">← Back</button>
+          <button id="proceed-to-step3-offline" class="flex-1 h-12 rounded-[14px] bg-teal text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-all duration-150 hover:bg-navy">
+            Continue
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* ── STEP 3 — Personalise ───────────────────────────────────── */}
+    <div id="step-3" class="portal-step hidden">
+      <div class="bg-white border border-navy/[0.08] rounded-[20px] p-7">
+        <h2 class="text-navy text-[20px] font-bold mb-1.5">Personalise your certificates</h2>
+        <p class="text-muted text-[14px] leading-relaxed mb-6">
+          Each space gets its own certificate. The name you enter will appear on the certificate — dedicate it to a person, a family, or in memory of someone.
+        </p>
+
+        <div id="cert-cards" class="flex flex-col gap-4"></div>
+
+        <p id="generate-error" class="hidden mt-4 text-[13px] text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3"></p>
+
+        <div class="mt-5 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-[13px] text-amber-800">
+          <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+          </svg>
+          <span>Please <strong>preview each certificate</strong> before generating — names and messages cannot be changed once issued.</span>
+        </div>
+
+        <div class="flex gap-3 mt-4 pt-5 border-t border-navy/[0.08]">
+          <button id="back-to-2" class="h-11 px-5 rounded-[12px] bg-navy/[0.05] text-navy text-[14px] font-medium hover:bg-navy/[0.1] transition-colors">← Back</button>
+          <button id="generate-btn" class="flex-1 h-12 rounded-[14px] bg-teal text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-all duration-150 hover:bg-navy hover:shadow-[0_4px_16px_rgba(15,36,62,0.2)]">
+            <span id="generate-btn-text">Generate Certificates</span>
+            <svg id="generate-spinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* ── STEP 4 — Download ──────────────────────────────────────── */}
+    <div id="step-4" class="portal-step hidden">
+      <div class="bg-white border border-navy/[0.08] rounded-[20px] p-7 text-center">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green/[0.1] mb-4">
+          <svg class="w-7 h-7 text-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h2 class="text-navy text-[20px] font-bold mb-1.5">Your certificates are ready</h2>
+        <p class="text-muted text-[14px] leading-relaxed mb-6">
+          BarakAllah feek. Download each certificate below.<br/>May Allah accept your generosity.
+        </p>
+
+        <div id="cert-downloads" class="flex flex-col gap-3 text-left mb-8"></div>
+
+      </div>
+    </div>
+
+  </div>
+
+  {/* ── Preview modal ───────────────────────────────────────────── */}
+  <div id="preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-navy/60 backdrop-blur-sm">
+    <div class="relative w-full max-w-[680px] bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col" style="max-height: 90vh;">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-navy/[0.08] shrink-0">
+        <div>
+          <h3 class="text-[16px] font-bold text-navy">Certificate Preview</h3>
+          <p class="text-[12px] text-muted mt-0.5">This is a preview — the final certificate will have a unique number.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="preview-new-tab" href="#" target="_blank" rel="noopener"
+            class="inline-flex items-center gap-1.5 h-8 px-3 rounded-[8px] bg-navy/[0.05] text-navy text-[12px] font-medium hover:bg-navy/[0.1] transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+            </svg>
+            Open in new tab
+          </a>
+          <button id="preview-close"
+            class="flex items-center justify-center w-8 h-8 rounded-[8px] bg-navy/[0.05] text-navy hover:bg-navy/[0.1] transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="relative flex-1 min-h-0">
+        <div id="preview-loading" class="absolute inset-0 flex items-center justify-center bg-white">
+          <svg class="w-8 h-8 text-teal animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+        </div>
+        <iframe id="preview-iframe" src="" class="w-full h-full border-0" style="min-height: 500px;"
+          onload="document.getElementById('preview-loading').style.display='none'">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .portal-step.hidden { display: none; }
+</style>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let donationType: 'online' | 'offline' | null = null
+let totalSpaces = 0
+let donorName = ''
+let donorEmail = ''
+let offlineQty = 1
+let pendingRedownloads: Array<{ id: string; recipientName: string; certificateNumber: string }> | null = null
+
+// ─── Step indicator ───────────────────────────────────────────────────────────
+function setStep(n: number) {
+  document.querySelectorAll<HTMLElement>('.portal-step').forEach(el => el.classList.add('hidden'))
+  document.getElementById(`step-${n === 2 && donationType === 'offline' ? '2-offline' : n === 2 ? '2-online' : n}`)?.classList.remove('hidden')
+  ;[1,2,3,4].forEach(i => {
+    const dot = document.getElementById(`dot-${i}`)
+    if (!dot) return
+    dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-200 ${i === n ? 'bg-teal' : i < n ? 'bg-teal/50' : 'bg-navy/[0.15]'}`
+  })
+}
+
+// ─── Step 1 ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-online')?.addEventListener('click', () => {
+  donationType = 'online'
+  donorEmail = ''
+  donorName = ''
+  setStep(2)
+})
+document.getElementById('btn-offline')?.addEventListener('click', () => {
+  donationType = 'offline'
+  donorEmail = ''
+  donorName = ''
+  setStep(2)
+})
+
+// ─── Step 2A — Email lookup ───────────────────────────────────────────────────
+document.getElementById('back-to-1-from-online')?.addEventListener('click', () => setStep(1))
+
+const lookupBtn = document.getElementById('lookup-btn') as HTMLButtonElement
+const lookupBtnText = document.getElementById('lookup-btn-text')!
+const lookupSpinner = document.getElementById('lookup-spinner')!
+const lookupResult = document.getElementById('lookup-result')!
+const proceedPanel = document.getElementById('proceed-panel')!
+const proceedSummary = document.getElementById('proceed-summary')!
+
+document.getElementById('donor-email')?.addEventListener('keydown', (e) => {
+  if ((e as KeyboardEvent).key === 'Enter') lookupBtn.click()
+})
+
+lookupBtn.addEventListener('click', async () => {
+  const emailInput = document.getElementById('donor-email') as HTMLInputElement
+  const email = emailInput.value.trim()
+  if (!email) { emailInput.focus(); return }
+
+  // Loading state
+  pendingRedownloads = null
+  lookupBtnText.classList.add('hidden')
+  lookupSpinner.classList.remove('hidden')
+  lookupBtn.disabled = true
+  lookupResult.className = 'hidden mt-4'
+  lookupResult.innerHTML = ''
+  proceedPanel.classList.add('hidden')
+  ;(document.getElementById('verify-name') as HTMLInputElement).value = ''
+  document.getElementById('name-verify-error')!.classList.add('hidden')
+  document.getElementById('proceed-btn-text')!.textContent = 'Personalise My Certificates'
+
+  try {
+    const res = await fetch('/api/lookup-spaces', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    const data = await res.json()
+
+    lookupResult.classList.remove('hidden')
+
+    if (!res.ok || data.error) {
+      lookupResult.className = 'mt-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-[14px] text-red-700'
+      lookupResult.textContent = data.error || 'Lookup failed. Please try again.'
+    } else if (!data.found || data.totalSpaces === 0) {
+      lookupResult.className = 'mt-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-[14px] text-amber-800'
+      lookupResult.innerHTML = `
+        <strong>No spaces found</strong> for <em>${email}</em>.<br/>
+        Please check the email address, or if you donated in person use the <strong>In Person / Cash</strong> option instead.
+      `
+    } else if (data.remainingToRequest === 0 && data.existingCertificates?.length > 0) {
+      // All certificates already issued — gate re-downloads behind name verification
+      donorEmail = email
+      donorName = data.donorName || ''
+      pendingRedownloads = data.existingCertificates
+      const count = data.existingCertificates.length
+
+      lookupResult.className = 'mt-4 flex items-start gap-3 px-4 py-3 rounded-xl bg-teal/[0.07] border border-teal/20 text-[14px] text-navy'
+      lookupResult.innerHTML = `
+        <svg class="w-5 h-5 text-teal shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <strong>${count} e-certificate${count !== 1 ? 's' : ''} found</strong> for ${email}
+          <br/><span class="text-navy/60 text-[13px]">All certificates have already been issued.</span>
+        </div>
+      `
+      lookupResult.classList.remove('hidden')
+
+      proceedSummary.textContent = `Confirm your name to access your ${count} previously issued e-certificate${count !== 1 ? 's' : ''}.`
+      document.getElementById('proceed-btn-text')!.textContent = 'Access My Certificates'
+      proceedPanel.classList.remove('hidden')
+    } else {
+      donorEmail = email
+      donorName = data.donorName || ''
+      totalSpaces = data.remainingToRequest
+
+      // Success state
+      lookupResult.className = 'mt-4 flex items-start gap-3 px-4 py-3 rounded-xl bg-teal/[0.07] border border-teal/20 text-[14px] text-navy'
+      lookupResult.innerHTML = `
+        <svg class="w-5 h-5 text-teal shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <strong>${data.remainingToRequest} space${data.remainingToRequest !== 1 ? 's' : ''} found</strong> for ${email}
+          ${data.alreadyIssued > 0 ? `<br/><span class="text-navy/60 text-[13px]">${data.alreadyIssued} certificate${data.alreadyIssued !== 1 ? 's' : ''} already issued — ${data.remainingToRequest} remaining</span>` : ''}
+        </div>
+      `
+
+      // Show proceed panel
+      let summaryText = `You'll be able to personalise ${data.remainingToRequest} e-certificate${data.remainingToRequest !== 1 ? 's' : ''} on the next step.`
+      if (data.alreadyIssued > 0 && data.existingCertificates?.length > 0) {
+        const redownloadLinks = data.existingCertificates.map((c: { id: string; recipientName: string; certificateNumber: string }) =>
+          `<a href="/api/certificate/${c.id}" download class="underline hover:text-teal transition-colors">${c.recipientName}</a>`
+        ).join(', ')
+        summaryText += ` You can also re-download your previously issued certificate${data.alreadyIssued !== 1 ? 's' : ''}: ${redownloadLinks}.`
+      }
+      proceedSummary.innerHTML = summaryText
+      proceedPanel.classList.remove('hidden')
+    }
+  } catch {
+    lookupResult.className = 'mt-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-[14px] text-red-700'
+    lookupResult.textContent = 'Something went wrong. Please try again.'
+    lookupResult.classList.remove('hidden')
+  } finally {
+    lookupBtnText.classList.remove('hidden')
+    lookupSpinner.classList.add('hidden')
+    lookupBtn.disabled = false
+  }
+})
+
+document.getElementById('proceed-to-step3-online')?.addEventListener('click', () => {
+  const verifyInput = document.getElementById('verify-name') as HTMLInputElement
+  const verifyError = document.getElementById('name-verify-error')!
+  const enteredName = verifyInput.value.trim()
+
+  verifyError.classList.add('hidden')
+
+  if (!enteredName) {
+    verifyInput.focus()
+    verifyError.textContent = 'Please enter your first and last name.'
+    verifyError.classList.remove('hidden')
+    return
+  }
+
+  if (donorName && enteredName.toLowerCase() !== donorName.toLowerCase()) {
+    verifyError.textContent = 'The name doesn\'t match our records. Please check and try again.'
+    verifyError.classList.remove('hidden')
+    verifyInput.select()
+    return
+  }
+
+  // Re-download path: show cert links in place, don't advance to step 3
+  if (pendingRedownloads) {
+    const certLinks = pendingRedownloads.map(c => `
+      <div class="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-teal/10">
+        <div>
+          <div class="text-[13px] font-semibold">${c.recipientName}</div>
+          <div class="text-[11px] text-muted">${c.certificateNumber}</div>
+        </div>
+        <a href="/api/certificate/${c.id}" download
+          class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-[8px] bg-teal text-white text-[12px] font-semibold hover:bg-navy transition-colors">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+          </svg>
+          Download
+        </a>
+      </div>
+    `).join('')
+    lookupResult.className = 'mt-4 rounded-xl bg-teal/[0.07] border border-teal/20 text-[14px] text-navy overflow-hidden'
+    lookupResult.innerHTML = `
+      <div class="px-4 py-3 flex items-start gap-2">
+        <svg class="w-4 h-4 text-teal shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>Identity confirmed. Download your e-certificates below.</span>
+      </div>
+      ${certLinks}
+    `
+    proceedPanel.classList.add('hidden')
+    pendingRedownloads = null
+    return
+  }
+
+  buildCertCards(totalSpaces, donorName)
+  setStep(3)
+})
+
+// ─── Step 2B — Offline ────────────────────────────────────────────────────────
+document.getElementById('back-to-1-from-offline')?.addEventListener('click', () => setStep(1))
+
+const qtyBtns = document.querySelectorAll<HTMLButtonElement>('.qty-btn')
+qtyBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    qtyBtns.forEach(b => {
+      b.classList.remove('bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]')
+      b.classList.add('bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]')
+    })
+    btn.classList.add('bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]')
+    btn.classList.remove('bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]')
+    offlineQty = parseInt(btn.dataset.qty ?? '1')
+    document.getElementById('custom-qty-row')!.classList.add('hidden')
+  })
+})
+
+document.getElementById('show-custom-qty')?.addEventListener('click', () => {
+  document.getElementById('custom-qty-row')!.classList.remove('hidden')
+  qtyBtns.forEach(b => {
+    b.classList.remove('bg-teal', 'text-white', 'shadow-[0_2px_12px_rgba(68,131,158,0.3)]')
+    b.classList.add('bg-navy/[0.04]', 'text-navy', 'hover:bg-navy/[0.08]')
+  })
+  const input = document.getElementById('custom-qty-input') as HTMLInputElement
+  input.focus()
+  input.addEventListener('input', () => {
+    const v = parseInt(input.value)
+    if (v >= 1 && v <= 100) offlineQty = v
+  })
+})
+
+document.getElementById('proceed-to-step3-offline')?.addEventListener('click', () => {
+  const customRow = document.getElementById('custom-qty-row')!
+  if (!customRow.classList.contains('hidden')) {
+    const input = document.getElementById('custom-qty-input') as HTMLInputElement
+    const v = parseInt(input.value)
+    if (!v || v < 1 || v > 100) { input.focus(); return }
+    offlineQty = v
+  }
+  totalSpaces = offlineQty
+  buildCertCards(totalSpaces, '')
+  setStep(3)
+})
+
+// ─── Step 3 — Certificate cards ───────────────────────────────────────────────
+function buildCertCards(count: number, defaultName: string) {
+  const container = document.getElementById('cert-cards')!
+  container.innerHTML = ''
+  for (let i = 1; i <= count; i++) {
+    const card = document.createElement('div')
+    card.className = 'border border-navy/[0.08] rounded-[14px] p-4 bg-navy/[0.015]'
+    card.innerHTML = `
+      <div class="flex items-center gap-2.5 mb-3">
+        <div class="flex items-center justify-center w-7 h-7 rounded-lg bg-teal/[0.1] text-teal text-[12px] font-bold shrink-0">${i}</div>
+        <div class="text-[14px] font-semibold text-navy">Certificate ${i} of ${count}</div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="block text-[13px] font-semibold text-navy mb-1" for="cert-name-${i}">
+            Recipient name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="cert-name-${i}"
+            class="w-full h-11 px-4 rounded-[11px] border-[1.5px] border-navy/[0.12] text-[14px] text-navy bg-white outline-none focus:border-teal transition-colors"
+            placeholder="e.g. Ibrahim Ali"
+            value="${i === 1 ? defaultName.replace(/"/g, '&quot;') : ''}"
+            maxlength="80"
+          />
+        </div>
+        <div>
+          <label class="block text-[13px] font-semibold text-navy mb-1" for="cert-msg-${i}">
+            Personal message <span class="text-[12px] font-normal text-muted">(optional)</span>
+          </label>
+          <textarea
+            id="cert-msg-${i}"
+            class="w-full min-h-[68px] px-4 py-3 rounded-[11px] border-[1.5px] border-navy/[0.12] text-[14px] text-navy bg-white outline-none focus:border-teal transition-colors resize-none font-inherit"
+            placeholder="e.g. Donated in memory of my father, may Allah have mercy on him."
+            maxlength="270"
+            style="font-family: inherit;"
+          ></textarea>
+        </div>
+        <button type="button" data-preview-idx="${i}"
+          class="preview-btn self-start inline-flex items-center gap-1.5 h-8 px-3 rounded-[8px] bg-navy/[0.04] text-navy text-[12px] font-medium hover:bg-navy/[0.08] transition-colors mt-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.572-3.007-9.964-7.178z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Preview certificate
+        </button>
+      </div>
+    `
+    container.appendChild(card)
+  }
+}
+
+document.getElementById('back-to-2')?.addEventListener('click', () => setStep(2))
+
+const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement
+const generateBtnText = document.getElementById('generate-btn-text')!
+const generateSpinner = document.getElementById('generate-spinner')!
+const generateError = document.getElementById('generate-error')!
+
+generateBtn.addEventListener('click', async () => {
+  generateError.classList.add('hidden')
+
+  const certs: Array<{ recipientName: string; spacesCount: number; message?: string }> = []
+  for (let i = 1; i <= totalSpaces; i++) {
+    const nameInput = document.getElementById(`cert-name-${i}`) as HTMLInputElement
+    const msgInput = document.getElementById(`cert-msg-${i}`) as HTMLTextAreaElement
+    const name = nameInput?.value.trim()
+    if (!name) {
+      nameInput?.focus()
+      generateError.textContent = `Please enter a recipient name for certificate ${i}.`
+      generateError.classList.remove('hidden')
+      return
+    }
+    certs.push({ recipientName: name, spacesCount: 1, message: msgInput?.value.trim() || undefined })
+  }
+
+  generateBtnText.classList.add('hidden')
+  generateSpinner.classList.remove('hidden')
+  generateBtn.disabled = true
+
+  try {
+    const res = await fetch('/api/request-certificates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ donorEmail: donorEmail || undefined, donationType, certificates: certs }),
+    })
+    const data = await res.json()
+
+    if (!res.ok || data.error) {
+      generateError.textContent = data.error || 'Something went wrong. Please try again.'
+      generateError.classList.remove('hidden')
+      return
+    }
+
+    buildDownloads(
+      data.certificateIds.map((id: string, idx: number) => ({ id, recipientName: certs[idx].recipientName }))
+    )
+    setStep(4)
+  } catch {
+    generateError.textContent = 'Something went wrong. Please try again.'
+    generateError.classList.remove('hidden')
+  } finally {
+    generateBtnText.classList.remove('hidden')
+    generateSpinner.classList.add('hidden')
+    generateBtn.disabled = false
+  }
+})
+
+// ─── Step 4 — Downloads ───────────────────────────────────────────────────────
+function buildDownloads(certs: Array<{ id: string; recipientName: string }>) {
+  const container = document.getElementById('cert-downloads')!
+  container.innerHTML = ''
+  certs.forEach((cert, i) => {
+    const card = document.createElement('div')
+    card.className = 'flex items-center justify-between gap-3 px-4 py-3.5 border border-navy/[0.08] rounded-[14px] bg-white'
+    card.innerHTML = `
+      <div>
+        <div class="text-[14px] font-semibold text-navy">${cert.recipientName}</div>
+        <div class="text-[12px] text-muted mt-0.5">Certificate ${i + 1} of ${certs.length}</div>
+      </div>
+      <a
+        href="/api/certificate/${cert.id}"
+        download
+        class="shrink-0 inline-flex items-center gap-1.5 h-9 px-4 rounded-[10px] bg-teal text-white text-[13px] font-semibold hover:bg-navy transition-colors"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        Download PDF
+      </a>
+    `
+    container.appendChild(card)
+  })
+}
+
+// ─── Preview modal ─────────────────────────────────────────────────────────────
+const previewModal = document.getElementById('preview-modal')!
+const previewIframe = document.getElementById('preview-iframe') as HTMLIFrameElement
+const previewNewTab = document.getElementById('preview-new-tab') as HTMLAnchorElement
+const previewLoading = document.getElementById('preview-loading')!
+
+function openPreview(name: string, spaces: number, message: string) {
+  const params = new URLSearchParams({ name, spaces: String(spaces) })
+  if (message) params.set('message', message)
+  const url = `/api/certificate-preview?${params.toString()}`
+
+  previewLoading.style.display = 'flex'
+  previewIframe.src = ''
+  previewNewTab.href = url
+  previewModal.classList.remove('hidden')
+  previewModal.classList.add('flex')
+  previewIframe.src = url
+}
+
+document.getElementById('preview-close')?.addEventListener('click', () => {
+  previewModal.classList.add('hidden')
+  previewModal.classList.remove('flex')
+  previewIframe.src = ''
+})
+
+previewModal.addEventListener('click', (e) => {
+  if (e.target === previewModal) {
+    previewModal.classList.add('hidden')
+    previewModal.classList.remove('flex')
+    previewIframe.src = ''
+  }
+})
+
+document.getElementById('cert-cards')?.addEventListener('click', (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.preview-btn')
+  if (!btn) return
+  const idx = parseInt(btn.dataset.previewIdx ?? '1')
+  const nameInput = document.getElementById(`cert-name-${idx}`) as HTMLInputElement
+  const msgInput = document.getElementById(`cert-msg-${idx}`) as HTMLTextAreaElement
+  const name = nameInput?.value.trim() || 'Recipient Name'
+  const message = msgInput?.value.trim() || ''
+  openPreview(name, 1, message)
+})
+</script>

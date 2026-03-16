@@ -82,6 +82,7 @@ export interface Footer {
     postcode?: string | null;
     phone?: string | null;
     email?: string | null;
+    directionsUrl?: string | null;
   };
   charityNumber?: string | null;
   copyright?: string | null;
@@ -369,6 +370,15 @@ export async function getCampaignBySlug(slug: string): Promise<Campaign | null> 
     `where[slug][equals]=${slug}&limit=1&depth=1`,
   );
   return result.docs[0] ?? null;
+}
+
+export interface PrayerTimesSettings {
+  jummahTimes?: string | null;
+  pdfTimetable?: (string | null) | Media;
+}
+
+export async function getPrayerTimesSettings(): Promise<PrayerTimesSettings> {
+  return getGlobal<PrayerTimesSettings>('prayer-times-settings');
 }
 
 /** Resolve a media field to its full URL. Prepends PAYLOAD_URL for relative paths. */

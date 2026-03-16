@@ -6,10 +6,9 @@ import NewsSection from '../components/NewsSection.astro';
 import PrayerTimesPanel from '../components/PrayerTimesPanel.astro';
 import QuickLinks from '../components/QuickLinks.astro';
 
-import { getHomePage, getLatestNews, getDonateSettings } from '../lib/payload';
+import { getHomePage, getLatestNews, getDonateSettings, getPrayerTimesSettings } from '../lib/payload';
 import type { Page, HeroSliderBlock, IconCardGridBlock, DonateSettings, News } from '../lib/payload';
 import { getTodayPrayerTimes } from '../lib/prayer-times';
-import type { PrayerTimesData } from '../lib/prayer-times';
 import { getPreviewData } from '../lib/preview-store';
 import { initRuntimeEnv } from '../lib/runtime-env';
 
@@ -19,13 +18,14 @@ initRuntimeEnv(Astro);
 const isPreview = Astro.url.searchParams.has('preview');
 
 // Fetch all data in parallel
-const [homePage, newsArticles, donateSettings, prayerData] = await Promise.all([
+const [homePage, newsArticles, donateSettings, prayerData, prayerTimesSettings] = await Promise.all([
   isPreview
     ? (getPreviewData('home') as Page | null ?? getHomePage().catch(() => null))
     : getHomePage().catch(() => null),
   getLatestNews(3).catch(() => [] as News[]),
   getDonateSettings().catch(() => null as DonateSettings | null),
   getTodayPrayerTimes().catch(() => null as PrayerTimesData | null),
+  getPrayerTimesSettings().catch(() => null),
 ]);
 
 // Extract layout blocks from the home page
@@ -40,12 +40,12 @@ const autoAdvance = heroBlock?.autoAdvance ?? 6;
 const quickLinkCards = iconCardBlock?.cards?.length
   ? iconCardBlock.cards
   : [
-      { label: 'Donate Online', url: '#' },
-      { label: 'Prayer Times', url: '#' },
-      { label: 'News', url: '#' },
+      { label: 'Donate Online', url: '/donate' },
+      { label: 'Prayer Times', url: '/salah-times' },
+      { label: 'News', url: '/news' },
       { label: 'Forms', url: '#' },
       { label: 'Volunteering', url: '#' },
-      { label: 'Contact Us', url: '#' },
+      { label: 'Contact Us', url: '/contact' },
       { label: 'Facilities', url: '#' },
       { label: 'Our Schools', url: '#' },
     ];
@@ -64,26 +64,9 @@ const donate: DonateSettings = donateSettings ?? {
   ctaText: 'Donate Now',
 };
 
-// Fallback prayer data when API is unavailable
-const fallbackPrayerData: PrayerTimesData = {
-  prayers: [
-    { name: 'Fajr', begins: '6:07', jamaah: '7:00' },
-    { name: 'Sunrise', begins: '7:46', jamaah: '' },
-    { name: 'Zuhr', begins: '12:19', jamaah: '1:00' },
-    { name: 'Asr', begins: '2:52', jamaah: '3:15' },
-    { name: 'Maghrib', begins: '4:43', jamaah: '4:48' },
-    { name: 'Isha', begins: '6:21', jamaah: '7:30' },
-  ],
-  nextPrayer: { name: 'Isha', jamaah: '7:30' },
-  date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
-  hijriDate: '',
-  isRamadan: false,
-};
-
-const prayers = prayerData ?? fallbackPrayerData;
 ---
 
-<Base title="Home" prayerData={prayers}>
+<Base title="Home" prayerData={prayerData}>
   <!-- ===== HERO BANNER ===== -->
   <HeroSlider slides={heroSlides} autoAdvance={autoAdvance} />
 
@@ -96,7 +79,7 @@ const prayers = prayerData ?? fallbackPrayerData;
     <!-- ===== NEWS + PRAYER TIMES ===== -->
     <section class="px-5 md:px-10 mt-8 lg:mt-10 flex flex-col lg:flex-row gap-6">
       <NewsSection articles={newsArticles} />
-      <PrayerTimesPanel prayerData={prayers} />
+      <PrayerTimesPanel prayerData={prayerData} jummahTimes={prayerTimesSettings?.jummahTimes} />
     </section>
 
     <!-- ===== QUICK LINKS ===== -->

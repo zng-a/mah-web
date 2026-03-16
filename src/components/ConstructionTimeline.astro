@@ -1,0 +1,320 @@
+---
+export type MilestoneStatus = 'complete' | 'in-progress' | 'upcoming';
+
+export interface Milestone {
+  title: string;
+  date: string;
+  description: string;
+  status: MilestoneStatus;
+  image?: { src: string; alt: string };
+}
+
+interface Props {
+  milestones: Milestone[];
+  ctaUrl?: string;
+}
+
+const { milestones, ctaUrl = '/donate' } = Astro.props;
+
+const completeCount    = milestones.filter(m => m.status === 'complete').length;
+const inProgressMilestone = milestones.find(m => m.status === 'in-progress');
+const nextMilestone    = milestones.find(m => m.status === 'upcoming');
+const grandOpening     = milestones[milestones.length - 1];
+const progressPct      = Math.round((completeCount / milestones.length) * 100);
+---
+
+<style>
+  @keyframes pulse-ring {
+    0%   { transform: scale(1);   opacity: 0.5; }
+    100% { transform: scale(2);   opacity: 0;   }
+  }
+  .pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+</style>
+
+<!-- ══════════════════════════════════════════════════ KPI BAR ══ -->
+<div class="w-full bg-navy">
+  <div class="max-w-[1440px] mx-auto px-5 md:px-10">
+
+    <!-- 2-col mobile, 4-col desktop, gap-px trick for dividers -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.07]">
+
+      <!-- KPI 1: Progress -->
+      <div class="bg-navy px-4 md:px-8 py-5 md:py-7">
+        <p class="text-white/40 text-[10px] font-bold uppercase tracking-[0.12em] mb-3">Milestones Complete</p>
+        <div class="flex items-end gap-2 mb-3">
+          <span class="text-white font-bold text-[36px] md:text-[40px] leading-none">{completeCount}</span>
+          <span class="text-white/30 text-[15px] font-medium pb-1">/ {milestones.length}</span>
+        </div>
+        <div class="h-[3px] bg-white/10 rounded-full overflow-hidden mb-1.5">
+          <div class="h-full bg-green rounded-full transition-all" style={`width:${progressPct}%`}></div>
+        </div>
+        <p class="text-white/30 text-[11px] font-medium">{progressPct}% of project complete</p>
+      </div>
+
+      <!-- KPI 2: Currently underway -->
+      <div class="bg-navy px-4 md:px-8 py-5 md:py-7">
+        <p class="text-white/40 text-[10px] font-bold uppercase tracking-[0.12em] mb-3">Currently Underway</p>
+        {inProgressMilestone ? (
+          <>
+            <p class="text-white font-bold text-[15px] md:text-[16px] leading-snug mb-3">
+              {inProgressMilestone.title}
+            </p>
+            <span class="inline-flex items-center gap-1.5 bg-teal/15 text-teal text-[11px] font-bold px-2.5 py-1 rounded-full">
+              <span class="relative flex h-1.5 w-1.5 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal opacity-60"></span>
+                <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-teal"></span>
+              </span>
+              Active
+            </span>
+          </>
+        ) : (
+          <p class="text-white/25 text-[15px]">—</p>
+        )}
+      </div>
+
+      <!-- KPI 3: Next milestone -->
+      <div class="bg-navy px-4 md:px-8 py-5 md:py-7">
+        <p class="text-white/40 text-[10px] font-bold uppercase tracking-[0.12em] mb-3">Next Milestone</p>
+        {nextMilestone ? (
+          <>
+            <p class="text-white font-bold text-[15px] md:text-[16px] leading-snug mb-2">
+              {nextMilestone.title}
+            </p>
+            <p class="text-teal text-[13px] font-semibold">{nextMilestone.date}</p>
+          </>
+        ) : (
+          <p class="text-white/25 text-[15px]">All complete</p>
+        )}
+      </div>
+
+      <!-- KPI 4: Grand opening -->
+      <div class="bg-navy px-4 md:px-8 py-5 md:py-7">
+        <p class="text-white/40 text-[10px] font-bold uppercase tracking-[0.12em] mb-3">Grand Opening</p>
+        <p class="text-white font-bold text-[22px] md:text-[26px] leading-tight mb-1">{grandOpening.date}</p>
+        <p class="text-white/40 text-[12px] font-medium">{grandOpening.title}</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ TIMELINE ══ -->
+<div class="max-w-[1440px] mx-auto px-5 md:px-10 py-12 md:py-20">
+  <div class="relative">
+
+    <!-- Vertical spine: left on mobile, centred on desktop -->
+    <div class="absolute top-0 bottom-0 w-px bg-navy/10
+                left-[9px]
+                md:left-1/2 md:-translate-x-px"></div>
+
+    {milestones.map((m, i) => {
+      const isLeft       = i % 2 === 0;
+      const isComplete   = m.status === 'complete';
+      const isInProgress = m.status === 'in-progress';
+      const isUpcoming   = m.status === 'upcoming';
+      const rowOpacity   = isUpcoming ? 'opacity-[0.65]' : '';
+      const hasImage     = !isUpcoming; // upcoming milestones never show an image slot
+
+      return (
+        <div class={rowOpacity}>
+
+          {/* ── MOBILE ── */}
+          <div class="flex items-start gap-4 mb-10 md:hidden">
+
+            {/* Node */}
+            <div class="shrink-0 mt-[22px] relative z-10 w-[18px] h-[18px] flex items-center justify-center">
+              {isComplete && (
+                <div class="w-[18px] h-[18px] rounded-full bg-green flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1.5 5.5l2.5 2.5 4.5-5"/>
+                  </svg>
+                </div>
+              )}
+              {isInProgress && (
+                <div class="relative w-[18px] h-[18px] flex items-center justify-center">
+                  <div class="absolute inset-[-5px] rounded-full border-2 border-teal pulse-ring"></div>
+                  <div class="w-[18px] h-[18px] rounded-full bg-teal"></div>
+                </div>
+              )}
+              {isUpcoming && (
+                <div class="w-[18px] h-[18px] rounded-full bg-white border-2 border-navy/20"></div>
+              )}
+            </div>
+
+            {/* Card */}
+            <div class="flex-1 min-w-0">
+              <div class="bg-white rounded-[20px] border border-navy/[0.07] overflow-hidden">
+                {hasImage && (
+                  <div class="h-[130px] w-full overflow-hidden">
+                    {m.image ? (
+                      <img src={m.image.src} alt={m.image.alt} class="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <div class="w-full h-full bg-navy/[0.04] flex items-center justify-center">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="text-navy/20">
+                          <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M9 9h1M14 9h1M9 13h1M14 13h1"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div class="p-5">
+                  {isComplete && (
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-green/10 text-green mb-3">
+                      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5l2.5 2.5L8 1.5"/></svg>
+                      Complete
+                    </span>
+                  )}
+                  {isInProgress && (
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal/10 text-teal mb-3">
+                      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="4.5" r="3.5"/><path d="M4.5 2.5v2l1.5 1.5"/></svg>
+                      In Progress
+                    </span>
+                  )}
+                  {isUpcoming && (
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-navy/5 text-navy/35 mb-3">
+                      <span class="w-1.5 h-1.5 rounded-full bg-navy/20 inline-block"></span>
+                      Upcoming
+                    </span>
+                  )}
+                  <p class="text-teal font-semibold text-[12px] mb-1">{m.date}</p>
+                  <h3 class="text-navy font-bold text-[15px] leading-snug mb-1.5">{m.title}</h3>
+                  <p class="text-muted text-[13px] leading-relaxed">{m.description}</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── DESKTOP ── */}
+          <div class="hidden md:grid grid-cols-[1fr_48px_1fr] items-start mb-12">
+
+            {/* Left slot */}
+            <div class="flex justify-end pr-8">
+              {isLeft && (
+                <div class="bg-white rounded-[20px] border border-navy/[0.07] overflow-hidden w-full max-w-[520px]">
+                  {hasImage && (
+                    <div class="h-[160px] w-full overflow-hidden">
+                      {m.image ? (
+                        <img src={m.image.src} alt={m.image.alt} class="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div class="w-full h-full bg-navy/[0.04] flex items-center justify-center">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="text-navy/20">
+                            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M9 9h1M14 9h1M9 13h1M14 13h1"/>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div class="p-6">
+                    {isComplete && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-green/10 text-green mb-3">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5l2.5 2.5L8 1.5"/></svg>
+                        Complete
+                      </span>
+                    )}
+                    {isInProgress && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal/10 text-teal mb-3">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="4.5" r="3.5"/><path d="M4.5 2.5v2l1.5 1.5"/></svg>
+                        In Progress
+                      </span>
+                    )}
+                    {isUpcoming && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-navy/5 text-navy/35 mb-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-navy/20 inline-block"></span>
+                        Upcoming
+                      </span>
+                    )}
+                    <p class="text-teal font-semibold text-[12px] mb-1.5">{m.date}</p>
+                    <h3 class="text-navy font-bold text-[17px] leading-snug mb-2">{m.title}</h3>
+                    <p class="text-muted text-[14px] leading-relaxed">{m.description}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Centre node */}
+            <div class="flex justify-center pt-5 relative z-10">
+              {isComplete && (
+                <div class="w-[18px] h-[18px] rounded-full bg-green flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1.5 5.5l2.5 2.5 4.5-5"/>
+                  </svg>
+                </div>
+              )}
+              {isInProgress && (
+                <div class="relative w-[18px] h-[18px] flex items-center justify-center shrink-0">
+                  <div class="absolute inset-[-5px] rounded-full border-2 border-teal pulse-ring"></div>
+                  <div class="w-[18px] h-[18px] rounded-full bg-teal shrink-0"></div>
+                </div>
+              )}
+              {isUpcoming && (
+                <div class="w-[18px] h-[18px] rounded-full bg-white border-2 border-navy/20 shrink-0"></div>
+              )}
+            </div>
+
+            {/* Right slot */}
+            <div class="pl-8">
+              {!isLeft && (
+                <div class="bg-white rounded-[20px] border border-navy/[0.07] overflow-hidden w-full max-w-[520px]">
+                  {hasImage && (
+                    <div class="h-[160px] w-full overflow-hidden">
+                      {m.image ? (
+                        <img src={m.image.src} alt={m.image.alt} class="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div class="w-full h-full bg-navy/[0.04] flex items-center justify-center">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="text-navy/20">
+                            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M9 9h1M14 9h1M9 13h1M14 13h1"/>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div class="p-6">
+                    {isComplete && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-green/10 text-green mb-3">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5l2.5 2.5L8 1.5"/></svg>
+                        Complete
+                      </span>
+                    )}
+                    {isInProgress && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-teal/10 text-teal mb-3">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="4.5" cy="4.5" r="3.5"/><path d="M4.5 2.5v2l1.5 1.5"/></svg>
+                        In Progress
+                      </span>
+                    )}
+                    {isUpcoming && (
+                      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-navy/5 text-navy/35 mb-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-navy/20 inline-block"></span>
+                        Upcoming
+                      </span>
+                    )}
+                    <p class="text-teal font-semibold text-[12px] mb-1.5">{m.date}</p>
+                    <h3 class="text-navy font-bold text-[17px] leading-snug mb-2">{m.title}</h3>
+                    <p class="text-muted text-[14px] leading-relaxed">{m.description}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </div>
+      );
+    })}
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ CTA ══ -->
+  <div class="text-center mt-4 md:mt-6">
+    <a
+      href={ctaUrl}
+      class="inline-flex items-center gap-2.5 bg-teal text-white font-bold text-[15px] px-7 py-3.5 rounded-xl hover:bg-teal/90 transition-colors"
+    >
+      Support Phase 2 — Adopt a Prayer Space
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8h10M9 4l4 4-4 4"/>
+      </svg>
+    </a>
+  </div>
+
+</div>

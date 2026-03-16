@@ -1,0 +1,114 @@
+---
+import Base from '../layouts/Base.astro';
+import ConstructionTimeline from '../components/ConstructionTimeline.astro';
+import type { Milestone } from '../components/ConstructionTimeline.astro';
+import { getTodayPrayerTimes } from '../lib/prayer-times';
+import { initRuntimeEnv } from '../lib/runtime-env';
+
+initRuntimeEnv(Astro);
+const prayerData = await getTodayPrayerTimes().catch(() => null);
+
+const milestones: Milestone[] = [
+  {
+    title: 'Commencement of Works',
+    date: 'March 2025',
+    description: 'New contractors appointed and plans revised.',
+    status: 'complete',
+    image: { src: '/images/construction/commencement.jpg', alt: 'Commencement of works — March 2025' },
+  },
+  {
+    title: 'Corrective Works Complete',
+    date: 'September 2025',
+    description: 'Corrective works from previous contractors and teams.',
+    status: 'complete',
+    image: { src: '/images/construction/corrective-works.jpg', alt: 'Corrective works — September 2025' },
+  },
+  {
+    title: 'First Fix Complete',
+    date: 'October 2025',
+    description: "Plumbing, Electrical, Plant Room, Whudu Area & W/C's",
+    status: 'complete',
+    image: { src: '/images/construction/first-fix.jpg', alt: 'First fix complete — October 2025' },
+  },
+  {
+    title: 'Second Fix Complete',
+    date: 'February 2026',
+    description: 'Tiling, Fixtures & Fittings, Doors, Windows, Carpets',
+    status: 'complete',
+    image: { src: '/images/construction/second-fix.jpg', alt: 'Second fix complete — February 2026' },
+  },
+  {
+    title: 'Phase 1 Open for Use',
+    date: 'March 2026',
+    description: 'Building to be used for Madrassah.',
+    status: 'in-progress',
+    image: { src: '/images/construction/phase-1-open.jpg', alt: 'Phase 1 open for use — March 2026' },
+  },
+  {
+    title: 'Phase 2 Commencement',
+    date: 'April 2026',
+    description: 'Finalisation of Phase 2 Plans.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Deconstruction',
+    date: 'May 2026',
+    description: 'The main building will be completely deconstructed, leaving only the front facade remaining.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Groundworks & Foundations',
+    date: 'July 2026',
+    description: 'Excavation, concrete foundations and drainage installed.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Structural Works',
+    date: 'August 2026',
+    description: 'Steel frame and masonry walls erected, roof structure completed.',
+    status: 'upcoming',
+  },
+  {
+    title: 'First Fix',
+    date: 'November 2026',
+    description: 'Electrical, plumbing and heating services run through the structure.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Second Fix',
+    date: 'December 2026',
+    description: 'Sockets, switches, sanitaryware, doors and plastering completed.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Fit Out & Finishing',
+    date: 'January 2027',
+    description: 'Prayer hall carpets, mihrab, minbar, sound system, lighting and final finishes installed.',
+    status: 'upcoming',
+  },
+  {
+    title: 'Grand Opening',
+    date: 'Late January 2027',
+    description: 'Masjid Al-Hikmah opens its doors — just in time for Ramadan 2027.',
+    status: 'upcoming',
+  },
+];
+---
+
+<Base title="Construction Progress" prayerData={prayerData}>
+  <main>
+
+    <div class="max-w-[1440px] mx-auto px-5 md:px-10 pt-8 md:pt-12 lg:pt-16 pb-8 md:pb-10 text-center">
+      <p class="text-teal font-semibold text-[13px] uppercase tracking-widest mb-3">Building for the Future</p>
+      <h1 class="text-[36px] md:text-[48px] lg:text-[56px] font-bold text-navy leading-tight mb-4">
+        Construction Progress
+      </h1>
+      <p class="text-[17px] md:text-[19px] text-muted max-w-2xl mx-auto leading-relaxed">
+        Follow the rebuild of Masjid Al-Hikmah — from groundworks to grand opening.
+      </p>
+    </div>
+
+    <ConstructionTimeline milestones={milestones} ctaUrl="/donate/adopt-a-space" />
+
+  </main>
+</Base>

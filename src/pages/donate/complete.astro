@@ -40,10 +40,32 @@ const successMessage = donateSettings?.successMessage
               <path d="M20 6L9 17l-5-5" />
             </svg>
           </div>
-          <h1 class="text-navy text-[32px] sm:text-[40px] font-bold mb-4">Thank You!</h1>
+          <h1 class="text-navy text-[32px] sm:text-[40px] font-bold mb-4">Jazakallah Khairun</h1>
           <p class="text-[16px] sm:text-[18px] leading-[1.7] text-muted mb-8" id="success-message">
             {successMessage}
           </p>
+
+          <!-- Certificate CTA — shown only for adopt-a-space -->
+          <div id="cert-cta" class="hidden mb-6 px-5 py-4 rounded-[18px] bg-teal/[0.07] border border-teal/20 text-left">
+            <div class="flex items-start gap-3">
+              <div class="shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-teal/10 text-teal mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[15px] font-bold text-navy mb-0.5">Generate your Certificate of Donation</p>
+                <p class="text-[13px] text-navy/60 mb-3">Receive a personalised e-certificate for each space you have adopted.</p>
+                <a href="/donate/certificate" class="inline-flex items-center gap-1.5 h-9 px-4 rounded-[10px] bg-teal text-white text-[13px] font-semibold hover:bg-navy transition-colors">
+                  Get My Certificate
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
           <a
             href="/"
             class="inline-flex items-center justify-center gap-2 bg-teal text-white font-bold text-[16px] rounded-xl h-[52px] px-8 hover:bg-teal/80 transition-colors"
@@ -112,6 +134,7 @@ const successMessage = donateSettings?.successMessage
     const paymentIntent = params.get('payment_intent');
     const redirectStatus = params.get('redirect_status');
     const donorEmail = params.get('donorEmail') || '';
+    const campaignSlug = params.get('campaignSlug') || '';
     const frequency = params.get('frequency') || 'one-off';
     const coversFees = params.get('coversFees') === 'true';
     const giftAid = params.get('giftAid') === 'true';
@@ -173,6 +196,9 @@ const successMessage = donateSettings?.successMessage
     } else {
       // succeeded
       showState('success');
+      if (campaignSlug === 'adopt-a-space') {
+        document.getElementById('cert-cta')?.classList.remove('hidden')
+      }
     }
   }
 
