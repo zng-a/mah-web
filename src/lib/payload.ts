@@ -155,6 +155,9 @@ export interface Campaign {
   manualAdjustment?: number;
   currentUnits?: number;
   unitAdjustment?: number;
+  currentSignups?: number;
+  signupAdjustment?: number;
+  goalSignups?: number;
   active: boolean;
   featuredImage?: Media;
   order: number;
