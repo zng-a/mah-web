@@ -615,13 +615,17 @@ generateBtn.addEventListener('click', async () => {
     const nameInput = document.getElementById(`cert-name-${i}`) as HTMLInputElement
     const msgInput = document.getElementById(`cert-msg-${i}`) as HTMLTextAreaElement
     const name = nameInput?.value.trim()
-    if (!name) {
-      nameInput?.focus()
-      generateError.textContent = `Please enter a recipient name for certificate ${i}.`
-      generateError.classList.remove('hidden')
-      return
+    if (name) {
+      certs.push({ recipientName: name, spacesCount: 1, message: msgInput?.value.trim() || undefined })
     }
-    certs.push({ recipientName: name, spacesCount: 1, message: msgInput?.value.trim() || undefined })
+  }
+
+  if (certs.length === 0) {
+    const firstInput = document.getElementById('cert-name-1') as HTMLInputElement
+    firstInput?.focus()
+    generateError.textContent = 'Please fill in at least one recipient name.'
+    generateError.classList.remove('hidden')
+    return
   }
 
   generateBtnText.classList.add('hidden')
