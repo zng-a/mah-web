@@ -36,12 +36,13 @@ export interface PrayerTimesData {
   isTomorrow: boolean; // true when all today's prayers have passed
 }
 
-/** Convert "HH:MM:SS" or "HH:MM" to display format "H:MM" */
+/** Convert "HH:MM:SS" or "HH:MM" to 12-hour display format "H:MM" */
 function formatTime(raw: string): string {
   const parts = raw.split(':');
   const hours = parseInt(parts[0], 10);
   const minutes = parts[1];
-  return `${hours}:${minutes}`;
+  const hours12 = hours % 12 || 12;
+  return `${hours12}:${minutes}`;
 }
 
 /** Convert "HH:MM:SS" to total minutes since midnight for comparison */
